@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "riley start sketches",
-    "sketch:create": "func() { riley create sketch \"sketches/$1\"; }; func",
+    "sketch:create": "riley create sketch -d sketches",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
     "lint": "eslint",

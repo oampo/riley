@@ -10,9 +10,13 @@ import pkgDir from "pkg-dir";
 
 const USAGE = `
 Usage:
-  riley create (sketchbook|sketch) <path>
+  riley create sketchbook <path>
+  riley create sketch <name> [-d <directory>]
   riley -h | --help
   riley --version
+
+Options:
+  -d <directory>, --directory=<directory>  The directory which should contain the sketch [default: ./]
 `;
 
 function parseArgs() {
@@ -92,9 +96,10 @@ async function createSketchbook(dir) {
   gitCommit(dir);
 }
 
-async function createSketch(dir) {
+async function createSketch(dir, name) {
+  const sketchDir = path.join(dir, name);
   const templateDir = await getTemplateDir("sketch");
-  await copyTemplate(templateDir, dir);
+  await copyTemplate(templateDir, sketchDir);
 }
 
 async function main() {
@@ -106,7 +111,7 @@ async function main() {
     }
 
     if (args.create && args.sketch) {
-      await createSketch(args["<path>"]);
+      await createSketch(args["--directory"], args["<name>"]);
     }
   } catch (e) {
     console.error(`Error: ${e.message}`);
