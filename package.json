@@ -1,0 +1,21 @@
+{
+  "name": "riley",
+  "version": "0.0.1",
+  "description": "A toolkit for creating generative art using an Axidraw pen plotter",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "author": "Joe Turner <joe@oampo.co.uk>",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "husky": "^7.0.1",
+    "prettier": "^2.3.2"
+  }
+}
