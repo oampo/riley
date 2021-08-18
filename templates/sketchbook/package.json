@@ -1,0 +1,24 @@
+{
+  "name": "riley-sketchbook-template",
+  "version": "0.0.1",
+  "description": "A generative art sketchbook",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "riley start sketches",
+    "sketch:create": "func() { riley create sketch \"sketches/$1\"; }; func",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepare": "husky install",
+    "lint": "eslint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "riley": "file:/home/joe/code/js/riley"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "husky": "^7.0.1",
+    "prettier": "^2.3.2"
+  }
+}
