@@ -4,14 +4,22 @@ import { execSync } from "child_process";
 import fs from "fs-extra";
 import path from "path";
 import { fileURLToPath } from "url";
+import { promisify } from "util";
 
 import { docopt } from "docopt";
+import globCb from "glob";
+import HtmlWebpackPlugin from "html-webpack-plugin";
 import pkgDir from "pkg-dir";
+import Webpack from "webpack";
+import WebpackDevServer from "webpack-dev-server/lib/Server.js";
+
+const glob = promisify(globCb);
 
 const USAGE = `
 Usage:
   riley create sketchbook <path>
   riley create sketch <name> [-d <directory>]
+  riley start [-d <directory>]
   riley -h | --help
   riley --version
 
@@ -102,6 +110,50 @@ async function createSketch(dir, name) {
   await copyTemplate(templateDir, sketchDir);
 }
 
+async function startDevServer(dir) {
+  const sketches = await glob(path.join(dir, "**", "src", "index.js"));
+
+  const entry = sketches.reduce((entry, sketch) => {
+    const sketchSegments = path.relative(dir, sketch).split(path.sep);
+    const sketchName = sketchSegments
+      // Slice off src/index.js
+      .slice(0, sketchSegments.length - 2)
+      .join("/");
+    return {
+      ...entry,
+      [sketchName]: `./${sketch}`,
+    };
+  }, {});
+
+  const htmlPlugins = Object.keys(entry).map(
+    (entry) =>
+      new HtmlWebpackPlugin({
+        title: `Riley sketchbook | ${entry}`,
+        chunks: [entry],
+        filename: `${entry}/index.html`,
+      })
+  );
+
+  const compiler = Webpack({
+    mode: "development",
+    entry,
+    output: {
+      path: path.resolve("build"),
+      filename: "[name]/index.js",
+    },
+    stats: "errors-warnings",
+    plugins: [...htmlPlugins],
+  });
+  const server = new WebpackDevServer(
+    {
+      port: 3000,
+      static: false,
+    },
+    compiler
+  );
+  server.start();
+}
+
 async function main() {
   try {
     const args = parseArgs();
@@ -112,6 +164,10 @@ async function main() {
 
     if (args.create && args.sketch) {
       await createSketch(args["--directory"], args["<name>"]);
+    }
+
+    if (args.start) {
+      startDevServer(args["--directory"]);
     }
   } catch (e) {
     console.error(`Error: ${e.message}`);
