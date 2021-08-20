@@ -4,6 +4,6 @@ function draw() {
   return [];
 }
 
-riley({
+export default riley({
   draw,
 });

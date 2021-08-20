@@ -125,12 +125,21 @@ async function startDevServer(dir) {
     };
   }, {});
 
+  const template = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "views",
+    "sketch.html"
+  );
+
   const htmlPlugins = Object.keys(entry).map(
     (entry) =>
       new HtmlWebpackPlugin({
         title: `Riley sketchbook | ${entry}`,
         chunks: [entry],
         filename: `${entry}/index.html`,
+        template,
+        inject: false,
+        scriptLoading: "blocking",
       })
   );
 
@@ -140,6 +149,17 @@ async function startDevServer(dir) {
     output: {
       path: path.resolve("build"),
       filename: "[name]/index.js",
+      library: "sketch",
+    },
+    module: {
+      rules: [
+        {
+          test: /\.m?js/,
+          resolve: {
+            fullySpecified: false,
+          },
+        },
+      ],
     },
     stats: "errors-warnings",
     plugins: [...htmlPlugins],

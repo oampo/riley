@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title><%= htmlWebpackPlugin.options.title %></title>
+    <%= htmlWebpackPlugin.tags.headTags %>
+    <style>
+      svg {
+        display: block;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="root"></main>
+    <%= htmlWebpackPlugin.tags.bodyTags %>
+    <script>
+      document.getElementById("root").appendChild(sketch.default.getElement());
+    </script>
+  </body>
+</html>
