@@ -1,9 +1,25 @@
+import { vec2 } from "gl-matrix";
+
 import config from "./config";
 
 // Re-export libraries under our namespace
 export * from "gl-matrix";
 // Re-export submodules
 export * from "./shape";
+
+const paperSizes = {
+  A0: vec2.fromValues(841, 1189),
+  A1: vec2.fromValues(594, 841),
+  A2: vec2.fromValues(420, 594),
+  A3: vec2.fromValues(297, 420),
+  A4: vec2.fromValues(210, 297),
+  A5: vec2.fromValues(148, 210),
+  A6: vec2.fromValues(105, 148),
+  A7: vec2.fromValues(74, 105),
+  A8: vec2.fromValues(52, 74),
+  A9: vec2.fromValues(37, 52),
+  A10: vec2.fromValues(26, 37),
+};
 
 let lastUpdateTime;
 let playing = false;
@@ -71,6 +87,7 @@ export default function riley(listeners, options) {
   Object.assign(config, options);
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  setPaperSize(svg, config.size, config.orientation);
 
   const lines = draw();
   renderLines(svg, lines);
