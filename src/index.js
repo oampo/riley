@@ -1,11 +1,16 @@
 import { vec2 } from "gl-matrix";
 
 import config from "./config";
+import { color } from "./color";
+import { hex } from "./data";
+import { weight } from "./line-attribute";
 
 // Re-export libraries under our namespace
 export * from "gl-matrix";
 // Re-export submodules
+export * from "./color";
 export * from "./shape";
+export * from "./line-attribute";
 
 const paperSizes = {
   A0: vec2.fromValues(841, 1189),
@@ -76,7 +81,27 @@ function setPaperSize(svg, size, orientation) {
   svg.setAttribute("viewbox", `0 0 ${width} ${height}`);
 }
 
-function renderLines(svg, lines) {}
+function renderLines(svg, lines) {
+  const elements = [];
+  for (const line of lines) {
+    const element = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "polyline"
+    );
+    const points = line.vertices
+      .map((vertex) => `${vertex[0]},${vertex[1]}`)
+      .join(" ");
+    element.setAttribute("points", points);
+    element.setAttribute("fill", "none");
+    element.setAttribute("stroke", `#${hex(color(line))}`);
+    element.setAttribute("stroke-width", weight(line));
+    element.setAttribute("stroke-linecap", "round");
+
+    elements.push(element);
+  }
+
+  svg.replaceChildren(...elements);
+}
 
 export default function riley(listeners, options) {
   const { draw, update } = listeners;
