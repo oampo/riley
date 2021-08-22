@@ -113,6 +113,7 @@ export default function riley(listeners, options) {
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   setPaperSize(svg, config.size, config.orientation);
+  svg.style.backgroundColor = `#${hex(config.backgroundColor)}`;
 
   const lines = draw();
   renderLines(svg, lines);
