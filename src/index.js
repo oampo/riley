@@ -82,7 +82,7 @@ function setSvgSize(svg, size) {
   svg.setAttribute("data-height", `${height}`);
   svg.setAttribute("width", `${width}mm`);
   svg.setAttribute("height", `${height}mm`);
-  svg.setAttribute("viewbox", `0 0 ${width} ${height}`);
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 }
 
 function renderLines(svg, lines) {
