@@ -29,7 +29,7 @@ const paperSizes = {
 let lastUpdateTime;
 let playing = false;
 
-function tick(draw, update, svg) {
+function tick(draw, update, svg, config) {
   if (!playing) {
     return;
   }
@@ -37,30 +37,30 @@ function tick(draw, update, svg) {
   const { timestep } = config;
   const time = Date.now();
   while (time - lastUpdateTime > timestep * 1000) {
-    update(timestep);
+    update(timestep, config);
     lastUpdateTime += timestep * 1000;
   }
 
-  const lines = draw();
+  const lines = draw(config);
   renderLines(svg, lines);
 
-  requestAnimationFrame(() => tick(draw, update, svg));
+  requestAnimationFrame(() => tick(draw, update, svg, config));
 }
 
-function play(draw, update, svg) {
+function play(draw, update, svg, config) {
   if (!update) {
     throw new Error("Must have an update listener to play");
   }
   playing = true;
   lastUpdateTime = Date.now();
-  requestAnimationFrame(() => tick(draw, update, svg));
+  requestAnimationFrame(() => tick(draw, update, svg, config));
 }
 
 function pause() {
   playing = false;
 }
 
-function setPaperSize(svg, size, orientation) {
+function getPaperSize(size, orientation) {
   if (typeof size === "string" || size instanceof String) {
     if (!(size in paperSizes)) {
       throw new Error(`Unknown paper size: ${size}`);
@@ -72,6 +72,10 @@ function setPaperSize(svg, size, orientation) {
     size = vec2.fromValues(size[1], size[0]);
   }
 
+  return size;
+}
+
+function setSvgSize(svg, size) {
   const [width, height] = size;
 
   svg.setAttribute("data-width", `${width}`);
@@ -112,14 +116,16 @@ export default function riley(listeners, options) {
   Object.assign(config, options);
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  setPaperSize(svg, config.size, config.orientation);
+  const paperSize = getPaperSize(config.paperSize, config.paperOrientation);
+  setSvgSize(svg, paperSize);
+  config.size = paperSize;
   svg.style.backgroundColor = `#${hex(config.backgroundColor)}`;
 
-  const lines = draw();
+  const lines = draw(config);
   renderLines(svg, lines);
 
   if (listeners.update && config.autoplay) {
-    play(draw, update);
+    play(draw, update, svg, config);
   }
 
   return {
@@ -127,7 +133,7 @@ export default function riley(listeners, options) {
       return svg;
     },
     play() {
-      play(draw, update, svg);
+      play(draw, update, svg, config);
     },
     pause,
   };
