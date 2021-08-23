@@ -1,27 +1,15 @@
-export function weight(lines, weight) {
-  if (!Array.isArray(lines)) {
-    lines = [lines];
-  }
-
+export function weight(group, weight) {
   if (!weight) {
-    return lines[0].weight;
+    return group.weight;
   }
 
-  for (const line of lines) {
-    line.weight = weight;
-  }
+  group.weight = weight;
 }
 
-export function layer(lines, layer) {
-  if (!Array.isArray(lines)) {
-    lines = [lines];
+export function layer(group, layer) {
+  if (!group) {
+    return group.layer;
   }
 
-  if (!layer) {
-    return lines[0].layer;
-  }
-
-  for (const line of lines) {
-    line.layer = layer;
-  }
+  group.layer = layer;
 }

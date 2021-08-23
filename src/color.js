@@ -1,13 +1,7 @@
-export function color(lines, color) {
-  if (!Array.isArray(lines)) {
-    lines = [lines];
-  }
-
+export function color(group, color) {
   if (!color) {
-    return lines[0].color;
+    return group.color;
   }
 
-  for (const line of lines) {
-    line.color = color;
-  }
+  group.color = color;
 }

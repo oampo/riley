@@ -41,8 +41,8 @@ function tick(draw, update, svg, config) {
     lastUpdateTime += timestep * 1000;
   }
 
-  const lines = draw(config);
-  renderLines(svg, lines);
+  const groups = draw(config);
+  renderGroups(svg, groups);
 
   requestAnimationFrame(() => tick(draw, update, svg, config));
 }
@@ -85,23 +85,29 @@ function setSvgSize(svg, size) {
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 }
 
-function renderLines(svg, lines) {
-  const elements = [];
-  for (const line of lines) {
-    const element = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "polyline"
-    );
-    const points = line.vertices
-      .map((vertex) => `${vertex[0]},${vertex[1]}`)
-      .join(" ");
-    element.setAttribute("points", points);
-    element.setAttribute("fill", "none");
-    element.setAttribute("stroke", `#${hex(color(line))}`);
-    element.setAttribute("stroke-width", weight(line));
-    element.setAttribute("stroke-linecap", "round");
+function renderGroups(svg, groups) {
+  if (!Array.isArray(groups)) {
+    groups = [groups];
+  }
 
-    elements.push(element);
+  const elements = [];
+  for (const group of groups) {
+    for (const vertices of group.lines) {
+      const element = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "polyline"
+      );
+      const points = vertices
+        .map((vertex) => `${vertex[0]},${vertex[1]}`)
+        .join(" ");
+      element.setAttribute("points", points);
+      element.setAttribute("fill", "none");
+      element.setAttribute("stroke", `#${hex(color(group))}`);
+      element.setAttribute("stroke-width", weight(group));
+      element.setAttribute("stroke-linecap", "round");
+
+      elements.push(element);
+    }
   }
 
   svg.replaceChildren(...elements);
@@ -121,8 +127,8 @@ export default function riley(listeners, options) {
   config.size = paperSize;
   svg.style.backgroundColor = `#${hex(config.backgroundColor)}`;
 
-  const lines = draw(config);
-  renderLines(svg, lines);
+  const groups = draw(config);
+  renderGroups(svg, groups);
 
   if (listeners.update && config.autoplay) {
     play(draw, update, svg, config);

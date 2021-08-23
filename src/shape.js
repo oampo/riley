@@ -2,14 +2,12 @@ import { vec2 } from "gl-matrix";
 import config from "./config";
 
 export function line(...vertices) {
-  return [
-    {
-      vertices,
-      color: config.defaultColor,
-      weight: config.defaultWeight,
-      layer: 0,
-    },
-  ];
+  return {
+    lines: [vertices],
+    color: config.defaultColor,
+    weight: config.defaultWeight,
+    layer: 0,
+  };
 }
 
 export function rect(center, size) {
