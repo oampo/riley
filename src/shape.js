@@ -42,6 +42,33 @@ export function circle(
   return line(...vertices);
 }
 
+export function ellipse(
+  center,
+  size,
+  { resolution = config.defaultResolution } = {}
+) {
+  // iRamanujan approximation for ellipse circumference
+  const h = (size[0] - size[1]) / (size[0] + size[1]);
+  const circumference =
+    Math.PI *
+    (size[0] + size[1]) *
+    (1 + (3 * h ** 2) / (10 + Math.sqrt(4 - 3 * h ** 2)));
+  const numVertices = circumference / resolution;
+  const segmentAngle = (2 * Math.PI) / numVertices;
+
+  const vertices = [];
+  for (let i = 0; i < numVertices; i++) {
+    const angle = i * segmentAngle;
+    const vertex = vec2.fromValues(
+      center[0] + size[0] * Math.sin(angle),
+      center[1] + size[1] * Math.cos(angle)
+    );
+    vertices.push(vertex);
+  }
+  vertices.push(vec2.clone(vertices[0]));
+  return line(...vertices);
+}
+
 function _bezier(
   p1,
   p2,
