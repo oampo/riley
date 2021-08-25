@@ -26,20 +26,52 @@ export function circle(
   { resolution = config.defaultResolution } = {}
 ) {
   const circumference = 2 * Math.PI * radius;
-  const numVertices = circumference / resolution;
+  const numVertices = Math.floor(circumference / resolution);
   const segmentAngle = (2 * Math.PI) / numVertices;
 
   const vertices = [];
-  for (let i = 0; i < numVertices; i++) {
+  for (let i = 0; i < numVertices + 1; i++) {
     const angle = i * segmentAngle;
     const vertex = vec2.fromValues(
-      center[0] + radius * Math.sin(angle),
-      center[1] + radius * Math.cos(angle)
+      center[0] + radius * Math.cos(angle),
+      center[1] + radius * Math.sin(angle)
     );
     vertices.push(vertex);
   }
-  vertices.push(vec2.clone(vertices[0]));
   return line(...vertices);
+}
+
+export function circularArc(
+  center,
+  radius,
+  fromAngle,
+  toAngle,
+  { resolution = config.defaultResolution } = {}
+) {
+  const arcLength = (toAngle - fromAngle) * radius;
+  const numVertices = Math.floor(arcLength / resolution);
+  const segmentAngle = (toAngle - fromAngle) / numVertices;
+
+  const vertices = [];
+  for (let i = 0; i < numVertices + 1; i++) {
+    const angle = fromAngle + i * segmentAngle - Math.PI / 2;
+    const vertex = vec2.fromValues(
+      center[0] + radius * Math.cos(angle),
+      center[1] + radius * Math.sin(angle)
+    );
+    vertices.push(vertex);
+  }
+  return line(...vertices);
+}
+
+function ellipseCircumference(size) {
+  // Ramanujan approximation for ellipse circumference
+  const h = (size[0] - size[1]) / (size[0] + size[1]);
+  return (
+    Math.PI *
+    (size[0] + size[1]) *
+    (1 + (3 * h ** 2) / (10 + Math.sqrt(4 - 3 * h ** 2)))
+  );
 }
 
 export function ellipse(
@@ -47,25 +79,46 @@ export function ellipse(
   size,
   { resolution = config.defaultResolution } = {}
 ) {
-  // iRamanujan approximation for ellipse circumference
-  const h = (size[0] - size[1]) / (size[0] + size[1]);
-  const circumference =
-    Math.PI *
-    (size[0] + size[1]) *
-    (1 + (3 * h ** 2) / (10 + Math.sqrt(4 - 3 * h ** 2)));
-  const numVertices = circumference / resolution;
+  const circumference = ellipseCircumference(size);
+  const numVertices = Math.floor(circumference / resolution);
   const segmentAngle = (2 * Math.PI) / numVertices;
 
   const vertices = [];
-  for (let i = 0; i < numVertices; i++) {
+  for (let i = 0; i < numVertices + 1; i++) {
     const angle = i * segmentAngle;
     const vertex = vec2.fromValues(
-      center[0] + size[0] * Math.sin(angle),
-      center[1] + size[1] * Math.cos(angle)
+      center[0] + size[0] * Math.cos(angle),
+      center[1] + size[1] * Math.sin(angle)
     );
     vertices.push(vertex);
   }
-  vertices.push(vec2.clone(vertices[0]));
+  return line(...vertices);
+}
+
+export function ellipticalArc(
+  center,
+  size,
+  fromAngle,
+  toAngle,
+  { resolution = config.defaultResolution } = {}
+) {
+  // Work out the number of vertices and segmetn angle for the entire ellipse
+  const circumference = ellipseCircumference(size);
+  const numVertices = Math.floor(circumference / resolution);
+  const segmentAngle = (2 * Math.PI) / numVertices;
+
+  const arcNumVertices = Math.floor((toAngle - fromAngle) / segmentAngle);
+  const arcSegmentAngle = (toAngle - fromAngle) / arcNumVertices;
+
+  const vertices = [];
+  for (let i = 0; i < arcNumVertices + 1; i++) {
+    const angle = fromAngle + i * arcSegmentAngle - Math.PI / 2;
+    const vertex = vec2.fromValues(
+      center[0] + size[0] * Math.cos(angle),
+      center[1] + size[1] * Math.sin(angle)
+    );
+    vertices.push(vertex);
+  }
   return line(...vertices);
 }
 
