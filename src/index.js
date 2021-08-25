@@ -9,8 +9,9 @@ import { weight } from "./line-attribute";
 export * from "gl-matrix";
 // Re-export submodules
 export * from "./color";
-export * from "./shape";
 export * from "./line-attribute";
+export * from "./shape";
+export * from "./transform";
 
 const paperSizes = {
   A0: vec2.fromValues(841, 1189),
