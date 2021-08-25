@@ -10,6 +10,7 @@ export * from "gl-matrix";
 // Re-export submodules
 export * from "./color";
 export * from "./line-attribute";
+export * from "./math";
 export * from "./shape";
 export * from "./transform";
 
