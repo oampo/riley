@@ -6,6 +6,7 @@ export function translate(group, translation) {
       vec2.add(vertex, vertex, translation);
     }
   }
+  return group;
 }
 
 export function scale(group, scale) {
@@ -14,6 +15,7 @@ export function scale(group, scale) {
       vec2.mul(vertex, vertex, scale);
     }
   }
+  return group;
 }
 
 export function rotate(group, rotation) {
@@ -23,6 +25,7 @@ export function rotate(group, rotation) {
       vec2.rotate(vertex, vertex, origin, rotation);
     }
   }
+  return group;
 }
 
 export function transform(group, transform) {
@@ -31,4 +34,5 @@ export function transform(group, transform) {
       vec2.transformMat3(vertex, vertex, transform);
     }
   }
+  return group;
 }
