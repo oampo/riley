@@ -9,6 +9,7 @@ import { weight } from "./attribute";
 export * from "gl-matrix";
 // Re-export submodules
 export * from "./attribute";
+export * from "./clip-mask";
 export * from "./color";
 export * from "./geometry";
 export * from "./math";
