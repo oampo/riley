@@ -8,8 +8,9 @@ import { weight } from "./attribute";
 // Re-export libraries under our namespace
 export * from "gl-matrix";
 // Re-export submodules
-export * from "./color";
 export * from "./attribute";
+export * from "./color";
+export * from "./geometry";
 export * from "./math";
 export * from "./shape";
 export * from "./transform";
