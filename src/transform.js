@@ -1,38 +1,30 @@
 import { vec2 } from "gl-matrix";
 
-export function translate(group, translation) {
-  for (const line of group.lines) {
-    for (const vertex of line) {
-      vec2.add(vertex, vertex, translation);
-    }
+export function translate(line, translation) {
+  for (const vertex of line.vertices) {
+    vec2.add(vertex, vertex, translation);
   }
-  return group;
+  return line;
 }
 
-export function scale(group, scale) {
-  for (const line of group.lines) {
-    for (const vertex of line) {
-      vec2.mul(vertex, vertex, scale);
-    }
+export function scale(line, scale) {
+  for (const vertex of line.vertices) {
+    vec2.mul(vertex, vertex, scale);
   }
-  return group;
+  return line;
 }
 
-export function rotate(group, rotation) {
+export function rotate(line, rotation) {
   const origin = vec2.create();
-  for (const line of group.lines) {
-    for (const vertex of line) {
-      vec2.rotate(vertex, vertex, origin, rotation);
-    }
+  for (const vertex of line.vertices) {
+    vec2.rotate(vertex, vertex, origin, rotation);
   }
-  return group;
+  return line;
 }
 
-export function transform(group, transform) {
-  for (const line of group.lines) {
-    for (const vertex of line) {
-      vec2.transformMat3(vertex, vertex, transform);
-    }
+export function transform(line, transform) {
+  for (const vertex of line.vertices) {
+    vec2.transformMat3(vertex, vertex, transform);
   }
-  return group;
+  return line;
 }

@@ -3,7 +3,7 @@ import config from "./config";
 
 export function line(...vertices) {
   return {
-    lines: [vertices],
+    vertices,
     color: config.defaultColor,
     weight: config.defaultWeight,
     layer: 0,

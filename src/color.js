@@ -1,7 +1,7 @@
-export function color(group, color) {
+export function color(line, color) {
   if (!color) {
-    return group.color;
+    return line.color;
   }
 
-  group.color = color;
+  line.color = color;
 }

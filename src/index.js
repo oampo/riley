@@ -3,14 +3,13 @@ import { vec2 } from "gl-matrix";
 import config from "./config";
 import { color } from "./color";
 import { hex } from "./data";
-import { weight } from "./line-attribute";
+import { weight } from "./attribute";
 
 // Re-export libraries under our namespace
 export * from "gl-matrix";
 // Re-export submodules
 export * from "./color";
-export * from "./group";
-export * from "./line-attribute";
+export * from "./attribute";
 export * from "./math";
 export * from "./shape";
 export * from "./transform";
@@ -44,8 +43,8 @@ function tick(draw, update, svg, config) {
     lastUpdateTime += timestep * 1000;
   }
 
-  const groups = draw(config);
-  renderGroups(svg, groups);
+  const lines = draw(config);
+  renderLines(svg, lines);
 
   requestAnimationFrame(() => tick(draw, update, svg, config));
 }
@@ -88,29 +87,28 @@ function setSvgSize(svg, size) {
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 }
 
-function renderGroups(svg, groups) {
-  if (!Array.isArray(groups)) {
-    groups = [groups];
+function renderLines(svg, lines) {
+  if (!Array.isArray(lines)) {
+    lines = [lines];
   }
 
   const elements = [];
-  for (const group of groups) {
-    for (const vertices of group.lines) {
-      const element = document.createElementNS(
-        "http://www.w3.org/2000/svg",
-        "polyline"
-      );
-      const points = vertices
-        .map((vertex) => `${vertex[0]},${vertex[1]}`)
-        .join(" ");
-      element.setAttribute("points", points);
-      element.setAttribute("fill", "none");
-      element.setAttribute("stroke", `#${hex(color(group))}`);
-      element.setAttribute("stroke-width", weight(group));
-      element.setAttribute("stroke-linecap", "round");
+  for (const line of lines) {
+    const { vertices } = line;
+    const element = document.createElementNS(
+      "http://www.w3.org/2000/svg",
+      "polyline"
+    );
+    const points = vertices
+      .map((vertex) => `${vertex[0]},${vertex[1]}`)
+      .join(" ");
+    element.setAttribute("points", points);
+    element.setAttribute("fill", "none");
+    element.setAttribute("stroke", `#${hex(color(line))}`);
+    element.setAttribute("stroke-width", weight(line));
+    element.setAttribute("stroke-linecap", "round");
 
-      elements.push(element);
-    }
+    elements.push(element);
   }
 
   svg.replaceChildren(...elements);
@@ -130,8 +128,8 @@ export default function riley(listeners, options) {
   config.size = paperSize;
   svg.style.backgroundColor = `#${hex(config.backgroundColor)}`;
 
-  const groups = draw(config);
-  renderGroups(svg, groups);
+  const lines = draw(config);
+  renderLines(svg, lines);
 
   if (listeners.update && config.autoplay) {
     play(draw, update, svg, config);
