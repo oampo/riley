@@ -12,6 +12,7 @@ export * from "./attribute";
 export * from "./clip-mask";
 export * from "./color";
 export * from "./geometry";
+export * from "./hatch";
 export * from "./math";
 export * from "./shape";
 export * from "./transform";
