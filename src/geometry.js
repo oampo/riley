@@ -1,4 +1,5 @@
 import { vec2, vec3 } from "gl-matrix";
+import { line } from "./shape";
 
 export function boundingBox(line) {
   if (!line.vertices.length) {
@@ -73,4 +74,16 @@ export function lineIntersectsLine(lineA, lineB, { sort = false } = {}) {
   }
 
   return intersections;
+}
+
+export function polygonContainsPoint(polygon, point) {
+  const { topLeft } = boundingBox(polygon);
+
+  // Create a line from outside the polygon to the point
+  const start = vec2.subtract(topLeft, topLeft, vec2.fromValues(1, 1));
+  const l = line(start, point);
+  const intersections = lineIntersectsLine(l, polygon);
+
+  // If there are an even number of intersections, the point is inside the polygon
+  return intersections.length % 2 === 1;
 }
