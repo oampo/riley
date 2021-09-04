@@ -14,6 +14,7 @@ export * from "./color";
 export * from "./geometry";
 export * from "./hatch";
 export * from "./math";
+export * from "./polygon-ops";
 export * from "./shape";
 export * from "./transform";
 
