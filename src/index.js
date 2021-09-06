@@ -1,9 +1,10 @@
 import { vec2 } from "gl-matrix";
 
 import config from "./config";
+import { weight } from "./attribute";
 import { color } from "./color";
 import { hex } from "./data";
-import { weight } from "./attribute";
+import { penDistance } from "./stats";
 
 // Re-export libraries under our namespace
 export * from "gl-matrix";
