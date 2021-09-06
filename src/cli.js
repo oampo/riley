@@ -10,7 +10,7 @@ import { docopt } from "docopt";
 import globCb from "glob";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import pkgDir from "pkg-dir";
-import Webpack from "webpack";
+import webpack from "webpack";
 import WebpackDevServer from "webpack-dev-server/lib/Server.js";
 
 const glob = promisify(globCb);
@@ -143,7 +143,7 @@ async function startDevServer(dir) {
       })
   );
 
-  const compiler = Webpack({
+  const compiler = webpack({
     mode: "development",
     entry,
     output: {
@@ -162,7 +162,19 @@ async function startDevServer(dir) {
       ],
     },
     stats: "errors-warnings",
-    plugins: [...htmlPlugins],
+    plugins: [
+      ...htmlPlugins,
+      // Work around stupid webpack issue:
+      // https://github.com/webpack/webpack/issues/5756
+      // Make rbush-knn import the compiled version of tinyqueue
+      new webpack.NormalModuleReplacementPlugin(/tinyqueue/, (resource) => {
+        if (!/rbush-knn/.test(resource.context)) {
+          return;
+        }
+
+        resource.request = "tinyqueue/tinyqueue.js";
+      }),
+    ],
   });
   const server = new WebpackDevServer(
     {

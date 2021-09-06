@@ -30,6 +30,8 @@
     "html-webpack-plugin": "^5.3.2",
     "martinez-polygon-clipping": "^0.7.1",
     "pkg-dir": "^5.0.0",
+    "rbush": "^3.0.1",
+    "rbush-knn": "^3.0.1",
     "webpack": "^5.51.1",
     "webpack-dev-server": "^4.0.0"
   }

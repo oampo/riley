@@ -4,7 +4,7 @@ import config from "./config";
 import { weight } from "./attribute";
 import { color } from "./color";
 import { hex } from "./data";
-import { penDistance } from "./stats";
+import { spatialSort, mergeNearby } from "./optimize";
 
 // Re-export libraries under our namespace
 export * from "gl-matrix";
@@ -15,6 +15,7 @@ export * from "./color";
 export * from "./geometry";
 export * from "./hatch";
 export * from "./math";
+export * from "./optimize";
 export * from "./polygon-ops";
 export * from "./shape";
 export * from "./transform";
@@ -96,6 +97,9 @@ function renderLines(svg, lines) {
   if (!Array.isArray(lines)) {
     lines = [lines];
   }
+
+  lines = spatialSort(lines);
+  lines = mergeNearby(lines);
 
   const elements = [];
   for (const line of lines) {
