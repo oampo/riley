@@ -1,4 +1,3 @@
-import { vec2 } from "gl-matrix";
 import RBush from "rbush";
 import knn from "rbush-knn";
 
@@ -25,19 +24,19 @@ export function spatialSort(lines) {
     const end = line.vertices[line.vertices.length - 1];
 
     const startNode = {
-      minX: start[0],
-      minY: start[1],
-      maxX: start[0],
-      maxY: start[1],
+      minX: start.x,
+      minY: start.y,
+      maxX: start.x,
+      maxY: start.y,
       index: i,
       isEnd: false,
     };
 
     const endNode = {
-      minX: end[0],
-      minY: end[1],
-      maxX: end[0],
-      maxY: end[1],
+      minX: end.x,
+      minY: end.y,
+      maxX: end.x,
+      maxY: end.y,
       index: i,
       isEnd: true,
     };
@@ -57,7 +56,7 @@ export function spatialSort(lines) {
   let end = line.vertices[line.vertices.length - 1];
   const new_lines = [line];
   for (let i = 0; i < lines.length - 1; i++) {
-    const [nearest] = knn(tree, end[0], end[1], 1);
+    const [nearest] = knn(tree, end.x, end.y, 1);
     // If the end point was closest, we reverse the vertices
     const line = lines[nearest.index];
     if (nearest.isEnd) {
@@ -87,7 +86,7 @@ export function mergeNearby(
   for (let i = 1; i < lines.length; i++) {
     const { vertices } = lines[i];
 
-    if (vec2.sqrDist(vertices[0], end) <= thresholdSquared) {
+    if (vertices[0].sqrDist(end) <= thresholdSquared) {
       line.vertices.push(...vertices.slice(1));
     } else {
       line = lines[i];

@@ -1,5 +1,6 @@
-import { vec2 } from "gl-matrix";
 import * as martinez from "martinez-polygon-clipping";
+
+import { vec2 } from "./math";
 
 function wrapMartinez(martinezFn) {
   return function (...polygons) {
@@ -10,13 +11,13 @@ function wrapMartinez(martinezFn) {
     const result = martinezFn(
       ...polygons.map((line) => {
         const { vertices } = line;
-        return [vertices];
+        return [vertices.map((vertex) => [vertex.x, vertex.y])];
       })
     );
 
     return result.map((x) => ({
       ...polygons[0],
-      vertices: x[0].map((vertex) => vec2.fromValues(vertex[0], vertex[1])),
+      vertices: x[0].map((vertex) => vec2(vertex[0], vertex[1])),
     }));
   };
 }

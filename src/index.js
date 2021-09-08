@@ -1,13 +1,10 @@
-import { vec2 } from "gl-matrix";
-
 import config from "./config";
 import { weight } from "./attribute";
 import { color } from "./color";
 import { hex } from "./data";
+import { vec2 } from "./math";
 import { spatialSort, mergeNearby } from "./optimize";
 
-// Re-export libraries under our namespace
-export * from "gl-matrix";
 // Re-export submodules
 export * from "./attribute";
 export * from "./clip-mask";
@@ -21,17 +18,17 @@ export * from "./shape";
 export * from "./transform";
 
 const paperSizes = {
-  A0: vec2.fromValues(841, 1189),
-  A1: vec2.fromValues(594, 841),
-  A2: vec2.fromValues(420, 594),
-  A3: vec2.fromValues(297, 420),
-  A4: vec2.fromValues(210, 297),
-  A5: vec2.fromValues(148, 210),
-  A6: vec2.fromValues(105, 148),
-  A7: vec2.fromValues(74, 105),
-  A8: vec2.fromValues(52, 74),
-  A9: vec2.fromValues(37, 52),
-  A10: vec2.fromValues(26, 37),
+  A0: vec2(841, 1189),
+  A1: vec2(594, 841),
+  A2: vec2(420, 594),
+  A3: vec2(297, 420),
+  A4: vec2(210, 297),
+  A5: vec2(148, 210),
+  A6: vec2(105, 148),
+  A7: vec2(74, 105),
+  A8: vec2(52, 74),
+  A9: vec2(37, 52),
+  A10: vec2(26, 37),
 };
 
 let lastUpdateTime;
@@ -77,14 +74,14 @@ function getPaperSize(size, orientation) {
   }
 
   if (orientation === "landscape") {
-    size = vec2.fromValues(size[1], size[0]);
+    size = vec2(size.y, size.x);
   }
 
   return size;
 }
 
 function setSvgSize(svg, size) {
-  const [width, height] = size;
+  const { x: width, y: height } = size;
 
   svg.setAttribute("data-width", `${width}`);
   svg.setAttribute("data-height", `${height}`);
@@ -109,7 +106,7 @@ function renderLines(svg, lines) {
       "polyline"
     );
     const points = vertices
-      .map((vertex) => `${vertex[0]},${vertex[1]}`)
+      .map((vertex) => `${vertex.x},${vertex.y}`)
       .join(" ");
     element.setAttribute("points", points);
     element.setAttribute("fill", "none");

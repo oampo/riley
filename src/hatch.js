@@ -1,7 +1,6 @@
-import { vec2 } from "gl-matrix";
-
 import config from "./config";
 import { boundingBox } from "./geometry";
+import { vec2 } from "./math";
 import { line } from "./shape";
 import { rotate, translate } from "./transform";
 import { clip } from "./clip-mask";
@@ -32,7 +31,7 @@ export function hatch(
   // Approach: render a hatched square the size of the bounding box diagonal,
   // then clip the box to the polygon
   const { size, center } = boundingBox(polygon);
-  const squareSize = vec2.len(size);
+  const squareSize = size.len();
   const spacingFn = getSpacingFn(spacing);
 
   const lines = [];
@@ -40,8 +39,8 @@ export function hatch(
   let i = 0;
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const start = vec2.fromValues(width, 0);
-    const end = vec2.fromValues(width, squareSize);
+    const start = vec2(width, 0);
+    const end = vec2(width, squareSize);
     let l;
     if (!alternate || i % 2 === 0) {
       l = render(start, end);
@@ -60,7 +59,7 @@ export function hatch(
   }
 
   const clipped = lines.flatMap((l) => {
-    translate(l, vec2.fromValues(-width / 2, -squareSize / 2));
+    translate(l, vec2(-width / 2, -squareSize / 2));
     rotate(l, angle);
     translate(l, center);
     return clip(l, polygon);

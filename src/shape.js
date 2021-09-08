@@ -1,5 +1,5 @@
-import { vec2, vec3 } from "gl-matrix";
 import config from "./config";
+import { vec2 } from "./math";
 
 export function line(...vertices) {
   return {
@@ -12,11 +12,11 @@ export function line(...vertices) {
 
 export function rect(center, size) {
   return line(
-    vec2.fromValues(center[0] - size[0] / 2, center[1] - size[1] / 2),
-    vec2.fromValues(center[0] - size[0] / 2, center[1] + size[1] / 2),
-    vec2.fromValues(center[0] + size[0] / 2, center[1] + size[1] / 2),
-    vec2.fromValues(center[0] + size[0] / 2, center[1] - size[1] / 2),
-    vec2.fromValues(center[0] - size[0] / 2, center[1] - size[1] / 2)
+    vec2(center.x - size.x / 2, center.y - size.y / 2),
+    vec2(center.x - size.x / 2, center.y + size.y / 2),
+    vec2(center.x + size.x / 2, center.y + size.y / 2),
+    vec2(center.x + size.x / 2, center.y - size.y / 2),
+    vec2(center.x - size.x / 2, center.y - size.y / 2)
   );
 }
 
@@ -32,9 +32,9 @@ export function circle(
   const vertices = [];
   for (let i = 0; i < numVertices + 1; i++) {
     const angle = i * segmentAngle;
-    const vertex = vec2.fromValues(
-      center[0] + radius * Math.cos(angle),
-      center[1] + radius * Math.sin(angle)
+    const vertex = vec2(
+      center.x + radius * Math.cos(angle),
+      center.y + radius * Math.sin(angle)
     );
     vertices.push(vertex);
   }
@@ -55,9 +55,9 @@ export function circularArc(
   const vertices = [];
   for (let i = 0; i < numVertices + 1; i++) {
     const angle = fromAngle + i * segmentAngle - Math.PI / 2;
-    const vertex = vec2.fromValues(
-      center[0] + radius * Math.cos(angle),
-      center[1] + radius * Math.sin(angle)
+    const vertex = vec2(
+      center.x + radius * Math.cos(angle),
+      center.y + radius * Math.sin(angle)
     );
     vertices.push(vertex);
   }
@@ -66,10 +66,10 @@ export function circularArc(
 
 function ellipseCircumference(size) {
   // Ramanujan approximation for ellipse circumference
-  const h = (size[0] - size[1]) / (size[0] + size[1]);
+  const h = (size.x - size.y) / (size.x + size.y);
   return (
     Math.PI *
-    (size[0] + size[1]) *
+    (size.x + size.y) *
     (1 + (3 * h ** 2) / (10 + Math.sqrt(4 - 3 * h ** 2)))
   );
 }
@@ -86,9 +86,9 @@ export function ellipse(
   const vertices = [];
   for (let i = 0; i < numVertices + 1; i++) {
     const angle = i * segmentAngle;
-    const vertex = vec2.fromValues(
-      center[0] + size[0] * Math.cos(angle),
-      center[1] + size[1] * Math.sin(angle)
+    const vertex = vec2(
+      center.x + size.x * Math.cos(angle),
+      center.y + size.y * Math.sin(angle)
     );
     vertices.push(vertex);
   }
@@ -113,9 +113,9 @@ export function ellipticalArc(
   const vertices = [];
   for (let i = 0; i < arcNumVertices + 1; i++) {
     const angle = fromAngle + i * arcSegmentAngle - Math.PI / 2;
-    const vertex = vec2.fromValues(
-      center[0] + size[0] * Math.cos(angle),
-      center[1] + size[1] * Math.sin(angle)
+    const vertex = vec2(
+      center.x + size.x * Math.cos(angle),
+      center.y + size.y * Math.sin(angle)
     );
     vertices.push(vertex);
   }
@@ -136,33 +136,33 @@ function _bezier(
   const distanceTolerance = resolution ** 2;
 
   // Calculate the midpoints
-  const mid12 = vec2.lerp(vec2.create(), p1, p2, 0.5);
-  const mid23 = vec2.lerp(vec2.create(), p2, p3, 0.5);
-  const mid34 = vec2.lerp(vec2.create(), p3, p4, 0.5);
-  const mid14 = vec2.lerp(vec2.create(), p1, p4, 0.5);
-  const mid123 = vec2.lerp(vec2.create(), mid12, mid23, 0.5);
-  const mid234 = vec2.lerp(vec2.create(), mid23, mid34, 0.5);
-  const mid1234 = vec2.lerp(vec2.create(), mid123, mid234, 0.5);
+  const mid12 = p1.lerp(p2, 0.5);
+  const mid23 = p2.lerp(p3, 0.5);
+  const mid34 = p3.lerp(p4, 0.5);
+  const mid14 = p1.lerp(p4, 0.5);
+  const mid123 = mid12.lerp(mid23, 0.5);
+  const mid234 = mid23.lerp(mid34, 0.5);
+  const mid1234 = mid123.lerp(mid234, 0.5);
 
   // Work out whether the points lie in a straight line
-  const diff14 = vec2.sub(vec2.create(), p4, p1);
-  const diff24 = vec2.sub(vec2.create(), p2, p4);
-  const diff34 = vec2.sub(vec2.create(), p3, p4);
+  const diff14 = p4.sub(p1);
+  const diff24 = p2.sub(p4);
+  const diff34 = p3.sub(p4);
   // If the cross-product is of two lines is ~zero, they are collinear
-  const cross124 = Math.abs(vec2.cross(vec3.create(), diff14, diff24)[2]);
-  const cross134 = Math.abs(vec2.cross(vec3.create(), diff14, diff34)[2]);
+  const cross124 = Math.abs(diff14.cross(diff24).z);
+  const cross134 = Math.abs(diff14.cross(diff34).z);
   const collinear124 = cross124 < Number.EPSILON;
   const collinear134 = cross134 < Number.EPSILON;
 
   if (collinear124 && collinear134) {
     // All four points are in a line
-    const distance = vec2.sqrDist(mid1234, mid14);
+    const distance = mid1234.sqrDist(mid14);
     if (distance <= distanceTolerance) {
       return [p1, mid1234, p4];
     }
   } else {
     // They're not collinear
-    if ((cross124 + cross134) ** 2 <= distanceTolerance * vec2.sqrLen(diff14)) {
+    if ((cross124 + cross134) ** 2 <= distanceTolerance * diff14.sqrLen()) {
       return [p1, mid1234, p4];
     }
   }
