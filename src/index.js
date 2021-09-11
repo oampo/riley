@@ -4,6 +4,7 @@ import { color } from "./color";
 import { hex } from "./data";
 import { vec2 } from "./math";
 import { spatialSort, mergeNearby } from "./optimize";
+import { seed } from "./random";
 
 // Re-export submodules
 export * from "./attribute";
@@ -14,6 +15,7 @@ export * from "./hatch";
 export * from "./math";
 export * from "./optimize";
 export * from "./polygon-ops";
+export * from "./random";
 export * from "./shape";
 export * from "./transform";
 
@@ -127,6 +129,8 @@ export default function riley(listeners, options) {
   }
 
   Object.assign(config, options);
+
+  seed(config.seed);
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   const paperSize = getPaperSize(config.paperSize, config.paperOrientation);

@@ -1,4 +1,8 @@
+import { customAlphabet } from "nanoid";
+
 import { vec4 } from "./math";
+
+const nanoid = customAlphabet("0123456789abcdef", 32);
 
 export default {
   autoplay: true,
@@ -10,4 +14,5 @@ export default {
   backgroundColor: vec4(1, 1, 1, 1),
   timestep: 1 / 60,
   defaultResolution: 2,
+  seed: nanoid(),
 };
