@@ -154,6 +154,7 @@ async function startDevServer(dir) {
 
   const template = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
+    "..",
     "views",
     "sketch.html"
   );
