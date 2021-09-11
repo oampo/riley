@@ -6,31 +6,58 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
 
-import { docopt } from "docopt";
 import globCb from "glob";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import pkgDir from "pkg-dir";
 import webpack from "webpack";
 import WebpackDevServer from "webpack-dev-server/lib/Server.js";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
 
 const glob = promisify(globCb);
 
-const USAGE = `
-Usage:
-  riley create sketchbook <path>
-  riley create sketch <name> [-d <directory>]
-  riley start [-d <directory>]
-  riley -h | --help
-  riley --version
-
-Options:
-  -d <directory>, --directory=<directory>  The directory which should contain the sketch [default: ./]
-`;
-
 function parseArgs() {
-  return docopt(USAGE, {
-    version: process.env.npm_package_version,
-  });
+  return yargs(hideBin(process.argv))
+    .command("create", "Create a new sketchbook or sketch", (yargs) => {
+      return yargs
+        .command("sketchbook <path>", "Create a new sketchbook", (yargs) => {
+          return yargs
+            .positional("path", {
+              describe: "The path to create the sketchbook",
+            })
+            .demandOption("path");
+        })
+        .command(
+          "sketch <name> [-d <directory>]",
+          "Create a new sketch",
+          (yargs) => {
+            return yargs
+              .positional("name", {
+                describe: "The name of the sketch",
+              })
+              .option("directory", {
+                alias: "d",
+                describe: "The directory which should contain the sketch",
+                default: "./",
+              })
+              .demandOption("name");
+          }
+        )
+        .version(false)
+        .demandCommand();
+    })
+    .command("start", "Start developing a sketch", (yargs) => {
+      return yargs
+        .option("directory", {
+          alias: "d",
+          describe: "The directory which contains the sketch",
+          default: "./",
+        })
+        .version(false);
+    })
+    .demandCommand()
+    .strict()
+    .help().argv;
 }
 
 async function getTemplateDir(templateName) {
@@ -190,16 +217,24 @@ async function main() {
   try {
     const args = parseArgs();
 
-    if (args.create && args.sketchbook) {
-      await createSketchbook(args["<path>"]);
-    }
+    const command = args._[0];
 
-    if (args.create && args.sketch) {
-      await createSketch(args["--directory"], args["<name>"]);
-    }
-
-    if (args.start) {
-      startDevServer(args["--directory"]);
+    switch (command) {
+      case "create": {
+        const command = args._[1];
+        switch (command) {
+          case "sketchbook":
+            await createSketchbook(args.path);
+            break;
+          case "sketch":
+            await createSketch(args.directory, args.name);
+            break;
+        }
+        break;
+      }
+      case "start":
+        startDevServer(args.directory);
+        break;
     }
   } catch (e) {
     console.error(`Error: ${e.message}`);

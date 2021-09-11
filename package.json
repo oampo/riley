@@ -23,7 +23,6 @@
     "prettier": "^2.3.2"
   },
   "dependencies": {
-    "docopt": "^0.6.2",
     "fs-extra": "^10.0.0",
     "gl-matrix": "^3.3.0",
     "glob": "^7.1.7",
@@ -35,6 +34,7 @@
     "rbush-knn": "^3.0.1",
     "seedrandom": "^3.0.5",
     "webpack": "^5.51.1",
-    "webpack-dev-server": "^4.0.0"
+    "webpack-dev-server": "^4.0.0",
+    "yargs": "^17.1.1"
   }
 }
