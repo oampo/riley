@@ -1,7 +1,7 @@
 import config from "./config";
 import { weight } from "./attribute";
-import { color } from "./color";
-import { hex } from "./data";
+import { color, alpha } from "./color";
+import { hex, rgbHex } from "./data";
 import { vec2 } from "./math";
 import { spatialSort, mergeNearby } from "./optimize";
 import { seed } from "./random";
@@ -35,6 +35,33 @@ const paperSizes = {
 
 let lastUpdateTime;
 let playing = false;
+let frameCount = 0;
+
+function render(svg, draw, config) {
+  let shouldExport = false;
+  const requestExport = () => (shouldExport = true);
+
+  const lines = draw({ pause, requestExport }, config);
+  renderLines(svg, lines, shouldExport);
+
+  if (shouldExport) {
+    const svgText = svg.outerHTML;
+    fetch("/api/export", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        content: svgText,
+        sketch: window.location.pathname
+          .slice(1)
+          .replace(/(\/(index.html)?)?$/, ""),
+        frameCount,
+        seed: config.seed,
+      }),
+    });
+  }
+}
 
 function tick(draw, update, svg, config) {
   if (!playing) {
@@ -44,12 +71,12 @@ function tick(draw, update, svg, config) {
   const { timestep } = config;
   const time = Date.now();
   while (time - lastUpdateTime > timestep * 1000) {
-    update(timestep, config);
+    update(timestep, { pause }, config);
     lastUpdateTime += timestep * 1000;
   }
 
-  const lines = draw(config);
-  renderLines(svg, lines);
+  render(svg, draw, config);
+  frameCount += 1;
 
   requestAnimationFrame(() => tick(draw, update, svg, config));
 }
@@ -92,13 +119,22 @@ function setSvgSize(svg, size) {
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 }
 
-function renderLines(svg, lines) {
+function createSvg(paperSize, backgroundColor) {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  setSvgSize(svg, paperSize);
+  svg.style.backgroundColor = `#${hex(backgroundColor)}`;
+  return svg;
+}
+
+function renderLines(svg, lines, optimize = false) {
   if (!Array.isArray(lines)) {
     lines = [lines];
   }
 
-  lines = spatialSort(lines);
-  lines = mergeNearby(lines);
+  if (optimize) {
+    lines = spatialSort(lines);
+    lines = mergeNearby(lines);
+  }
 
   const elements = [];
   for (const line of lines) {
@@ -108,11 +144,19 @@ function renderLines(svg, lines) {
       "polyline"
     );
     const points = vertices
-      .map((vertex) => `${vertex.x},${vertex.y}`)
+      .map((vertex) =>
+        optimize
+          ? `${vertex.x.toFixed(3)},${vertex.y.toFixed(3)}`
+          : `${vertex.x},${vertex.y}`
+      )
       .join(" ");
     element.setAttribute("points", points);
     element.setAttribute("fill", "none");
-    element.setAttribute("stroke", `#${hex(color(line))}`);
+    element.setAttribute("stroke", `#${rgbHex(color(line))}`);
+    element.setAttribute(
+      "stroke-opacity",
+      optimize ? alpha(line).toFixed(3) : alpha(line)
+    );
     element.setAttribute("stroke-width", weight(line));
     element.setAttribute("stroke-linecap", "round");
 
@@ -132,14 +176,12 @@ export default function riley(listeners, options) {
 
   seed(config.seed);
 
-  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   const paperSize = getPaperSize(config.paperSize, config.paperOrientation);
-  setSvgSize(svg, paperSize);
   config.size = paperSize;
-  svg.style.backgroundColor = `#${hex(config.backgroundColor)}`;
 
-  const lines = draw(config);
-  renderLines(svg, lines);
+  const svg = createSvg(paperSize, config.backgroundColor);
+
+  render(svg, draw, config);
 
   if (listeners.update && config.autoplay) {
     play(draw, update, svg, config);

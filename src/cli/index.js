@@ -6,9 +6,11 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { promisify } from "util";
 
+import express from "express";
 import globCb from "glob";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import pkgDir from "pkg-dir";
+import sanitizeFilename from "sanitize-filename";
 import webpack from "webpack";
 import WebpackDevServer from "webpack-dev-server/lib/Server.js";
 import yargs from "yargs";
@@ -137,6 +139,11 @@ async function createSketch(dir, name) {
   await copyTemplate(templateDir, sketchDir);
 }
 
+function isSubpath(dirA, dirB) {
+  const relative = path.relative(dirA, dirB);
+  return relative && !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+
 async function startDevServer(dir) {
   const sketches = await glob(path.join(dir, "**", "src", "index.js"));
 
@@ -208,6 +215,22 @@ async function startDevServer(dir) {
     {
       port: 3000,
       static: false,
+      onBeforeSetupMiddleware: ({ app }) => {
+        app.use(express.json());
+        app.post("/api/export", async function (req, res) {
+          const { sketch, seed, frameCount, content } = req.body;
+          const exportDir = path.join(dir, sketch, "export");
+          if (!isSubpath(dir, exportDir)) {
+            return res.status(400).json({
+              message: "Export directory must be subpath of sketch directory",
+            });
+          }
+          const fileName = sanitizeFilename(`frame.${seed}.${frameCount}.svg`);
+          await fs.ensureDir(exportDir);
+          await fs.writeFile(path.join(exportDir, fileName), content);
+          res.status(201).json({});
+        });
+      },
     },
     compiler
   );
