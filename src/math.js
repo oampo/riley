@@ -83,3 +83,26 @@ export function remap(value, fromStart, fromStop, toStart, toStop) {
   const toRange = toStop - toStart;
   return toStart + (toRange * (value - fromStart)) / fromRange;
 }
+
+export function clamp(a, min, max) {
+  if (a < min) {
+    return min;
+  } else if (a > max) {
+    return max;
+  }
+  return a;
+}
+
+export function lerp(a, b, x) {
+  return a + x * (b - a);
+}
+
+export function smoothstep(a, b, x) {
+  x = clamp((x - a) / (b - a), 0, 1);
+  return x * x * (3 - 2 * x);
+}
+
+export function smootherstep(a, b, x) {
+  x = clamp((x - a) / (b - a), 0, 1);
+  return x * x * x * (x * (x * 6 - 15) + 10);
+}
