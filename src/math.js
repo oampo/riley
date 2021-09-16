@@ -8,12 +8,6 @@ import Mat4 from "./mat4";
 import Quat from "./quat";
 import Quat2 from "./quat2";
 
-export function mapRange(value, fromStart, fromStop, toStart, toStop) {
-  const fromRange = fromStop - fromStart;
-  const toRange = toStop - toStart;
-  return toStart + (toRange * (value - fromStart)) / fromRange;
-}
-
 export function vec2(x, y) {
   return new Vec2(x, y);
 }
@@ -82,4 +76,10 @@ export function quat(x, y, z, w) {
 
 export function quat2(rx, ry, rz, rw, dx, dy, dz, dw) {
   return new Quat2(rx, ry, rz, rw, dx, dy, dz, dw);
+}
+
+export function remap(value, fromStart, fromStop, toStart, toStop) {
+  const fromRange = fromStop - fromStart;
+  const toRange = toStop - toStart;
+  return toStart + (toRange * (value - fromStart)) / fromRange;
 }
