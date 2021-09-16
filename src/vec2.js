@@ -27,6 +27,12 @@ export default class Vec2 {
   set ["1"](value) {
     this.y = value;
   }
+
+  modulo(a) {
+    const x = this.x % a.x;
+    const y = this.y % a.y;
+    return new Vec2(x, y);
+  }
 }
 
 const vec2Methods = [
@@ -71,6 +77,7 @@ const aliases = {
   sub: "subtract",
   mul: "multiply",
   div: "divide",
+  mod: "modulo",
   dist: "distance",
   sqrDist: "squaredDistance",
   len: "length",

@@ -34,6 +34,13 @@ export default class Vec3 {
   set ["2"](value) {
     this.z = value;
   }
+
+  modulo(a) {
+    const x = this.x % a.x;
+    const y = this.y % a.y;
+    const z = this.z % a.z;
+    return new Vec3(x, y, z);
+  }
 }
 
 const vec3Methods = [
@@ -80,6 +87,7 @@ const aliases = {
   sub: "subtract",
   mul: "multiply",
   div: "divide",
+  mod: "modulo",
   dist: "distance",
   sqrDist: "squaredDistance",
   len: "length",
