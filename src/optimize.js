@@ -80,6 +80,10 @@ export function mergeNearby(
 
   lines = lines.filter(({ vertices }) => vertices.length);
 
+  if (!lines.length) {
+    return lines;
+  }
+
   let line = lines[0];
   let end = line.vertices[line.vertices.length - 1];
   const new_lines = [line];
