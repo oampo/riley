@@ -3,6 +3,7 @@ import { weight } from "./attribute";
 import { color, alpha } from "./color";
 import { hex, rgbHex } from "./data";
 import { vec2 } from "./math";
+import { noiseSeed } from "./noise";
 import { spatialSort, mergeNearby } from "./optimize";
 import { randomSeed } from "./random";
 
@@ -13,6 +14,7 @@ export * from "./color";
 export * from "./geometry";
 export * from "./hatch";
 export * from "./math";
+export * from "./noise";
 export * from "./optimize";
 export * from "./polygon-ops";
 export * from "./random";
@@ -175,6 +177,7 @@ export default function riley(listeners, options) {
   Object.assign(config, options);
 
   randomSeed(config.seed);
+  noiseSeed(config.seed);
 
   const paperSize = getPaperSize(config.paperSize, config.paperOrientation);
   config.size = paperSize;
