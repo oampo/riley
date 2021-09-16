@@ -4,6 +4,8 @@ function draw() {
   return [];
 }
 
-export default riley({
+const app = riley({
   draw,
 });
+
+export default app;

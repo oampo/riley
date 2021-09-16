@@ -38,12 +38,14 @@ const paperSizes = {
 let lastUpdateTime;
 let playing = false;
 let frameCount = 0;
+let shouldExport = false;
+
+function requestExport() {
+  shouldExport = true;
+}
 
 function render(svg, draw, config) {
-  let shouldExport = false;
-  const requestExport = () => (shouldExport = true);
-
-  const lines = draw({ pause, requestExport }, config);
+  const lines = draw(config);
   renderLines(svg, lines, shouldExport);
 
   if (shouldExport) {
@@ -63,6 +65,8 @@ function render(svg, draw, config) {
       }),
     });
   }
+
+  shouldExport = false;
 }
 
 function tick(draw, update, svg, config) {
@@ -73,7 +77,7 @@ function tick(draw, update, svg, config) {
   const { timestep } = config;
   const time = Date.now();
   while (time - lastUpdateTime > timestep * 1000) {
-    update(timestep, { pause }, config);
+    update(timestep, config);
     lastUpdateTime += timestep * 1000;
   }
 
@@ -184,10 +188,10 @@ export default function riley(listeners, options) {
 
   const svg = createSvg(paperSize, config.backgroundColor);
 
-  render(svg, draw, config);
-
   if (listeners.update && config.autoplay) {
     play(draw, update, svg, config);
+  } else {
+    requestAnimationFrame(() => render(svg, draw, config));
   }
 
   return {
@@ -198,5 +202,6 @@ export default function riley(listeners, options) {
       play(draw, update, svg, config);
     },
     pause,
+    requestExport,
   };
 }
