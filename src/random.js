@@ -2,7 +2,7 @@ import seedrandom from "seedrandom";
 
 let rng;
 
-export function seed(seed) {
+export function randomSeed(seed) {
   rng = new seedrandom(seed);
 }
 

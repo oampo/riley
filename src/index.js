@@ -4,7 +4,7 @@ import { color, alpha } from "./color";
 import { hex, rgbHex } from "./data";
 import { vec2 } from "./math";
 import { spatialSort, mergeNearby } from "./optimize";
-import { seed } from "./random";
+import { randomSeed } from "./random";
 
 // Re-export submodules
 export * from "./attribute";
@@ -174,7 +174,7 @@ export default function riley(listeners, options) {
 
   Object.assign(config, options);
 
-  seed(config.seed);
+  randomSeed(config.seed);
 
   const paperSize = getPaperSize(config.paperSize, config.paperOrientation);
   config.size = paperSize;
