@@ -88,9 +88,12 @@ export function mergeNearby(
   let end = line.vertices[line.vertices.length - 1];
   const new_lines = [line];
   for (let i = 1; i < lines.length; i++) {
-    const { vertices } = lines[i];
+    const { vertices, color } = lines[i];
 
-    if (vertices[0].sqrDist(end) <= thresholdSquared) {
+    if (
+      line.color.equals(color) &&
+      vertices[0].sqrDist(end) <= thresholdSquared
+    ) {
       line.vertices.push(...vertices.slice(1));
     } else {
       line = lines[i];
