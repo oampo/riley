@@ -15,7 +15,7 @@ export function weight(line, weight) {
 }
 
 export function layer(line, layer) {
-  if (!line) {
+  if (!layer) {
     return line.layer;
   }
 
