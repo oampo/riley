@@ -1,5 +1,5 @@
 import config from "./config";
-import { weight } from "./attribute";
+import { layer, weight } from "./attribute";
 import { color, alpha } from "./color";
 import { hex, rgbHex } from "./data";
 import { vec2 } from "./math";
@@ -138,39 +138,76 @@ function renderLines(svg, lines, optimize = false) {
     lines = [lines];
   }
 
-  if (optimize) {
-    lines = spatialSort(lines);
-    lines = mergeNearby(lines);
+  if (!lines.length) {
+    svg.replaceChildren();
   }
 
-  const elements = [];
+  lines.sort((a, b) => layer(a) - layer(b));
+
+  const layerIds = [];
+  const linesByLayerId = {};
   for (const line of lines) {
-    const { vertices } = line;
-    const element = document.createElementNS(
-      "http://www.w3.org/2000/svg",
-      "polyline"
-    );
-    const points = vertices
-      .map((vertex) =>
-        optimize
-          ? `${vertex.x.toFixed(3)},${vertex.y.toFixed(3)}`
-          : `${vertex.x},${vertex.y}`
-      )
-      .join(" ");
-    element.setAttribute("points", points);
-    element.setAttribute("fill", "none");
-    element.setAttribute("stroke", `#${rgbHex(color(line))}`);
-    element.setAttribute(
-      "stroke-opacity",
-      optimize ? alpha(line).toFixed(3) : alpha(line)
-    );
-    element.setAttribute("stroke-width", weight(line));
-    element.setAttribute("stroke-linecap", "round");
+    const layerId = layer(line);
+    if (!(layerId in linesByLayerId)) {
+      layerIds.push(layerId);
+      linesByLayerId[layerId] = [line];
+      continue;
+    }
 
-    elements.push(element);
+    linesByLayerId[layerId].push(line);
   }
 
-  svg.replaceChildren(...elements);
+  const layers = [];
+  for (const layerId of layerIds) {
+    let lines = linesByLayerId[layerId];
+    if (optimize) {
+      lines = spatialSort(lines);
+      lines = mergeNearby(lines);
+    }
+
+    const layer = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    layer.setAttributeNS("http://www.w3.org/2000/svg", "id", layerId);
+    layer.setAttributeNS(
+      "http://www.inkscape.org/namespaces/inkscape",
+      "inkscape:groupmode",
+      "layer"
+    );
+    layer.setAttributeNS(
+      "http://www.inkscape.org/namespaces/inkscape",
+      "inkscape:label",
+      layerId
+    );
+
+    for (const line of lines) {
+      const { vertices } = line;
+      const element = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "polyline"
+      );
+      const points = vertices
+        .map((vertex) =>
+          optimize
+            ? `${vertex.x.toFixed(3)},${vertex.y.toFixed(3)}`
+            : `${vertex.x},${vertex.y}`
+        )
+        .join(" ");
+      element.setAttribute("points", points);
+      element.setAttribute("fill", "none");
+      element.setAttribute("stroke", `#${rgbHex(color(line))}`);
+      element.setAttribute(
+        "stroke-opacity",
+        optimize ? alpha(line).toFixed(3) : alpha(line)
+      );
+      element.setAttribute("stroke-width", weight(line));
+      element.setAttribute("stroke-linecap", "round");
+
+      layer.appendChild(element);
+    }
+
+    layers.push(layer);
+  }
+
+  svg.replaceChildren(...layers);
 }
 
 export default function riley(listeners, options) {
