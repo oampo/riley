@@ -26,6 +26,7 @@ export function hatch(
     spacing = config.defaultWeight * 2,
     render = (start, end) => line(start, end),
     alternate = true,
+    polygonHash,
   } = {}
 ) {
   // Approach: render a hatched square the size of the bounding box diagonal,
@@ -62,7 +63,7 @@ export function hatch(
     translate(l, vec2(-width / 2, -squareSize / 2));
     rotate(l, angle);
     translate(l, center);
-    return clip(l, polygon);
+    return clip(l, polygon, { polygonHash });
   });
 
   return clipped;

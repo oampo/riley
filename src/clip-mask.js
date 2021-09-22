@@ -1,7 +1,7 @@
 import { line } from "./shape";
 import { lineIntersectsLine, polygonContainsPoint } from "./geometry";
 
-export function clip(l, polygon) {
+export function clip(l, polygon, { lineHash, polygonHash } = {}) {
   if (!l.vertices.length) {
     return [l];
   }
@@ -9,10 +9,14 @@ export function clip(l, polygon) {
     return [line()];
   }
 
-  const intersections = lineIntersectsLine(l, polygon, { sort: true });
+  const intersections = lineIntersectsLine(l, polygon, {
+    sort: true,
+    hashA: lineHash,
+    hashB: polygonHash,
+  });
 
   if (!intersections.length) {
-    if (polygonContainsPoint(polygon, l.vertices[0])) {
+    if (polygonContainsPoint(polygon, l.vertices[0], { polygonHash })) {
       // Entire line is inside the polygon
       return [l];
     }
@@ -20,7 +24,7 @@ export function clip(l, polygon) {
     return [];
   }
 
-  let inside = polygonContainsPoint(polygon, l.vertices[0]);
+  let inside = polygonContainsPoint(polygon, l.vertices[0], { polygonHash });
   let start = l.vertices[0];
   let segmentIndex = 0;
   const new_lines = [];
@@ -51,15 +55,19 @@ export function clip(l, polygon) {
   return new_lines;
 }
 
-export function mask(l, polygon) {
+export function mask(l, polygon, { lineHash, polygonHash } = {}) {
   if (!l.vertices.length || !polygon.vertices.length) {
     return [l];
   }
 
-  const intersections = lineIntersectsLine(l, polygon, { sort: true });
+  const intersections = lineIntersectsLine(l, polygon, {
+    sort: true,
+    hashA: lineHash,
+    hashB: polygonHash,
+  });
 
   if (!intersections.length) {
-    if (polygonContainsPoint(polygon, l.vertices[0])) {
+    if (polygonContainsPoint(polygon, l.vertices[0], { polygonHash })) {
       // Entire line is inside the polygon
       return [];
     }
@@ -67,7 +75,7 @@ export function mask(l, polygon) {
     return [l];
   }
 
-  let inside = polygonContainsPoint(polygon, l.vertices[0]);
+  let inside = polygonContainsPoint(polygon, l.vertices[0], { polygonHash });
   let start = l.vertices[0];
   let segmentIndex = 0;
   const new_lines = [];
