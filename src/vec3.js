@@ -41,6 +41,13 @@ export default class Vec3 {
     const z = this.z % a.z;
     return new Vec3(x, y, z);
   }
+
+  abs() {
+    const x = Math.abs(this.x);
+    const y = Math.abs(this.y);
+    const z = Math.abs(this.z);
+    return new Vec3(x, y, z);
+  }
 }
 
 const vec3Methods = [

@@ -83,6 +83,14 @@ export default class Vec4 {
     const w = this.w % a.w;
     return new Vec4(x, y, z, w);
   }
+
+  abs() {
+    const x = Math.abs(this.x);
+    const y = Math.abs(this.y);
+    const z = Math.abs(this.z);
+    const w = Math.abs(this.w);
+    return new Vec4(x, y, z, w);
+  }
 }
 
 const vec4Methods = [

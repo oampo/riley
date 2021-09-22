@@ -33,6 +33,12 @@ export default class Vec2 {
     const y = this.y % a.y;
     return new Vec2(x, y);
   }
+
+  abs() {
+    const x = Math.abs(this.x);
+    const y = Math.abs(this.y);
+    return new Vec2(x, y);
+  }
 }
 
 const vec2Methods = [
