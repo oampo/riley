@@ -22,6 +22,7 @@ export * from "./polygon-ops";
 export * from "./random";
 export * from "./raster";
 export * from "./shape";
+export * from "./spatial-hash";
 export * from "./transform";
 
 const paperSizes = {
