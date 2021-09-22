@@ -20,6 +20,7 @@ export * from "./noise";
 export * from "./optimize";
 export * from "./polygon-ops";
 export * from "./random";
+export * from "./raster";
 export * from "./shape";
 export * from "./transform";
 
