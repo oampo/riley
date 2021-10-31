@@ -1,3 +1,10 @@
+export function clone(line) {
+  return {
+    vertices: [...line.vertices],
+    ...line
+  };
+}
+
 export function subdivide(line, maxDistance) {
   const newVertices = [];
   for (let i = 0; i < line.vertices.length - 1; i++) {
