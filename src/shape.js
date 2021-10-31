@@ -145,7 +145,7 @@ function _bezier(
   const mid1234 = mid123.lerp(mid234, 0.5);
 
   // Work out whether the points lie in a straight line
-  const diff14 = p4.sub(p1);
+  const diff14 = p1.sub(p4);
   const diff24 = p2.sub(p4);
   const diff34 = p3.sub(p4);
   // If the cross-product is of two lines is ~zero, they are collinear
