@@ -4,6 +4,7 @@ export function vertices(line, vertices) {
   }
 
   line.vertices = vertices;
+  return line;
 }
 
 export function weight(line, weight) {
@@ -12,6 +13,7 @@ export function weight(line, weight) {
   }
 
   line.weight = weight;
+  return line;
 }
 
 export function layer(line, layer) {
@@ -20,6 +22,7 @@ export function layer(line, layer) {
   }
 
   line.layer = layer;
+  return line;
 }
 
 export function mapVertices(line, fn) {

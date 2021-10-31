@@ -4,6 +4,7 @@ export function color(line, color) {
   }
 
   line.color = color;
+  return line;
 }
 
 export function red(line, value) {
@@ -12,6 +13,7 @@ export function red(line, value) {
   }
 
   line.color.r = value;
+  return line;
 }
 
 export function green(line, value) {
@@ -20,6 +22,7 @@ export function green(line, value) {
   }
 
   line.color.g = value;
+  return line;
 }
 
 export function blue(line, value) {
@@ -28,6 +31,7 @@ export function blue(line, value) {
   }
 
   line.color.b = value;
+  return line;
 }
 
 export function alpha(line, value) {
@@ -36,4 +40,5 @@ export function alpha(line, value) {
   }
 
   line.color.a = value;
+  return line;
 }
