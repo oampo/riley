@@ -229,6 +229,10 @@ export default function riley(listeners, options) {
 
   const svg = createSvg(paperSize, config.backgroundColor);
 
+  if (listeners.setup) {
+    listeners.setup(config);
+  }
+
   if (listeners.update && config.autoplay) {
     play(draw, update, svg, config);
   } else {
