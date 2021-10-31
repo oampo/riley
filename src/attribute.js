@@ -29,3 +29,8 @@ export function mapVertices(line, fn) {
   line.vertices = line.vertices.map(fn);
   return line;
 }
+
+export function pushVertices(line, ...vertices) {
+  line.vertices.push(...vertices);
+  return line;
+}
