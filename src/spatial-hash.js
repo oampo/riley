@@ -39,6 +39,24 @@ export class SpatialHash {
       }
     }
   }
+
+  search(center, size) {
+    center = center.div(this.gridSize);
+    size = size.div(this.gridSize);
+    const topLeft = center.sub(size.scale(0.5)).floor();
+    const bottomRight = center.add(size.scale(0.5)).ceil();
+
+    const result = [];
+    for (let x=topLeft.x; x<bottomRight.x; x++) {
+      for (let y=topLeft.y; y<bottomRight.y; y++) {
+        const hash = `${x.toFixed()},${y.toFixed()}`;
+        if (hash in this) {
+          result.push(...this[hash]);
+        }
+      }
+    }
+    return result;
+  }
 }
 
 export function spatialHash(options) {
