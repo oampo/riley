@@ -171,3 +171,12 @@ export function polygonContainsPoint(polygon, point, { polygonHash }) {
   // If there are an even number of intersections, the point is inside the polygon
   return intersections.length % 2 === 1;
 }
+
+export function aabbContainsPoint(center, size, point) {
+  return (
+    point.x >= center.x - size.x / 2 &&
+    point.x <= center.x + size.x / 2 &&
+    point.y >= center.y - size.y / 2 &&
+    point.y <= center.y + size.y / 2
+  );
+}
