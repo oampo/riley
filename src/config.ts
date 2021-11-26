@@ -15,4 +15,5 @@ export default {
   timestep: 1 / 60,
   defaultResolution: 2,
   seed: nanoid(),
+  size: undefined,
 };

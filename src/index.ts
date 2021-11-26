@@ -2,7 +2,7 @@ import config from "./config";
 import { layer, weight } from "./attribute";
 import { color, alpha } from "./color";
 import { hex, rgbHex } from "./data";
-import { vec2 } from "./math";
+import { vec2, Vec2 } from "./math";
 import { noiseSeed } from "./noise";
 import { spatialSort, mergeNearby } from "./optimize";
 import { randomSeed } from "./random";
@@ -104,19 +104,23 @@ function pause() {
   playing = false;
 }
 
-function getPaperSize(size, orientation) {
-  if (typeof size === "string" || size instanceof String) {
+function getPaperSize(size: string | Vec2, orientation) {
+  let vecSize: Vec2;
+
+  if (typeof size === "string") {
     if (!(size in paperSizes)) {
       throw new Error(`Unknown paper size: ${size}`);
     }
-    size = paperSizes[size];
+    vecSize = paperSizes[size];
+  } else {
+    vecSize = size;
   }
 
   if (orientation === "landscape") {
-    size = vec2(size.y, size.x);
+    return vec2(vecSize.y, vecSize.x);
   }
 
-  return size;
+  return vecSize;
 }
 
 function setSvgSize(svg, size) {
@@ -199,9 +203,12 @@ function renderLines(svg, lines, optimize = false) {
       element.setAttribute("stroke", `#${rgbHex(color(line))}`);
       element.setAttribute(
         "stroke-opacity",
-        optimize ? alpha(line).toFixed(3) : alpha(line)
+        optimize ? alpha(line).toFixed(3) : alpha(line).toString()
       );
-      element.setAttribute("stroke-width", weight(line));
+      element.setAttribute(
+        "stroke-width",
+        optimize ? weight(line).toFixed(3) : weight(line).toString()
+      );
       element.setAttribute("stroke-linecap", "round");
 
       layer.appendChild(element);
@@ -222,7 +229,7 @@ export default function riley(listeners, options) {
   Object.assign(config, options);
 
   randomSeed(config.seed);
-  noiseSeed(config.seed);
+  noiseSeed();
 
   const paperSize = getPaperSize(config.paperSize, config.paperOrientation);
   config.size = paperSize;

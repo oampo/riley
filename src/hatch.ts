@@ -1,11 +1,18 @@
 import config from "./config";
 import { boundingBox } from "./geometry";
-import { vec2 } from "./math";
+import Line from "./line";
+import { Vec2, vec2 } from "./math";
 import { line } from "./shape";
+import { SpatialHash } from "./spatial-hash";
 import { rotate, translate } from "./transform";
 import { clip } from "./clip-mask";
 
-function getSpacingFn(spacing) {
+type HatchSpacing =
+  | number
+  | Array<number>
+  | ((i: number, x: number, squareSize: number) => number);
+
+function getSpacingFn(spacing: HatchSpacing) {
   if (typeof spacing === "number") {
     return () => spacing;
   }
@@ -19,6 +26,14 @@ function getSpacingFn(spacing) {
   }
 }
 
+interface HatchOptions {
+  angle?: number;
+  spacing?: HatchSpacing;
+  render?: (start: Vec2, end: Vec2) => Line | Array<Line>;
+  alternate?: boolean;
+  polygonHash?: SpatialHash;
+}
+
 export function hatch(
   polygon,
   {
@@ -27,7 +42,7 @@ export function hatch(
     render = (start, end) => line(start, end),
     alternate = true,
     polygonHash,
-  } = {}
+  }: HatchOptions = {}
 ) {
   // Approach: render a hatched square the size of the bounding box diagonal,
   // then clip the box to the polygon

@@ -1,6 +1,10 @@
 import { vec3 } from "gl-matrix";
 
 export default class Vec3 {
+  x: number;
+  y: number;
+  z: number;
+
   constructor(x = 0, y = 0, z = 0) {
     this.x = x;
     this.y = y;
@@ -15,20 +19,20 @@ export default class Vec3 {
     return this.x;
   }
 
-  get ["1"]() {
-    return this.y;
-  }
-
-  get ["2"]() {
-    return this.z;
-  }
-
   set ["0"](value) {
     this.x = value;
   }
 
+  get ["1"]() {
+    return this.y;
+  }
+
   set ["1"](value) {
     this.y = value;
+  }
+
+  get ["2"]() {
+    return this.z;
   }
 
   set ["2"](value) {
@@ -47,6 +51,10 @@ export default class Vec3 {
     const y = Math.abs(this.y);
     const z = Math.abs(this.z);
     return new Vec3(x, y, z);
+  }
+
+  dot(a: Vec3): number {
+    return this.x * a.x + this.y * a.y + this.z * a.z;
   }
 }
 

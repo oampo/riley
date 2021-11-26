@@ -3,9 +3,12 @@
   "version": "0.0.1",
   "description": "A toolkit for creating generative art using an Axidraw pen plotter",
   "type": "module",
-  "main": "src/index.js",
+  "main": "build/index.js",
   "scripts": {
-    "start": "node src/cli/index.js",
+    "start": "npm run build && node build/cli/index.js",
+    "build": "tsc",
+    "preinstall": "npm run build",
+    "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
     "lint": "eslint .",
@@ -13,14 +16,17 @@
     "format:check": "prettier --check ."
   },
   "bin": {
-    "riley": "src/cli/index.js"
+    "riley": "build/cli/index.js"
   },
   "author": "Joe Turner <joe@oampo.co.uk>",
   "license": "MIT",
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.4.0",
+    "@typescript-eslint/parser": "^5.4.0",
     "eslint": "^7.32.0",
     "husky": "^7.0.1",
-    "prettier": "^2.3.2"
+    "prettier": "^2.3.2",
+    "typescript": "^4.5.2"
   },
   "dependencies": {
     "fs-extra": "^10.0.0",

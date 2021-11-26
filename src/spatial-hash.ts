@@ -1,4 +1,4 @@
-import { vec2 } from "./math";
+import { vec2, Vec2 } from "./math";
 import { vertices } from "./attribute";
 import { rasterSegment } from "./raster";
 
@@ -8,6 +8,7 @@ export function hashPoint(v, { gridSize = vec2(10, 10) } = {}) {
 }
 
 export class SpatialHash {
+  gridSize: Vec2;
   constructor({ gridSize = vec2(10, 10) } = {}) {
     Object.defineProperty(this, "gridSize", {
       value: gridSize,
@@ -47,8 +48,8 @@ export class SpatialHash {
     const bottomRight = center.add(size.scale(0.5)).ceil();
 
     const result = [];
-    for (let x=topLeft.x; x<bottomRight.x; x++) {
-      for (let y=topLeft.y; y<bottomRight.y; y++) {
+    for (let x = topLeft.x; x < bottomRight.x; x++) {
+      for (let y = topLeft.y; y < bottomRight.y; y++) {
         const hash = `${x.toFixed()},${y.toFixed()}`;
         if (hash in this) {
           result.push(...this[hash]);

@@ -2,7 +2,10 @@ import { vec2 } from "gl-matrix";
 
 import Vec3 from "./vec3";
 
-export default class Vec2 {
+class Vec2 {
+  x: number;
+  y: number;
+
   constructor(x = 0, y = 0) {
     this.x = x;
     this.y = y;
@@ -16,25 +19,75 @@ export default class Vec2 {
     return this.x;
   }
 
-  get ["1"]() {
-    return this.y;
-  }
-
   set ["0"](value) {
     this.x = value;
+  }
+
+  get ["1"]() {
+    return this.y;
   }
 
   set ["1"](value) {
     this.y = value;
   }
 
-  modulo(a) {
+  add(a: Vec2): Vec2 {
+    const x = this.x + a.y;
+    const y = this.y + a.y;
+    return new Vec2(x, y);
+  }
+
+  subtract(a: Vec2): Vec2 {
+    const x = this.x - a.y;
+    const y = this.y - a.y;
+    return new Vec2(x, y);
+  }
+
+  multiply(a: Vec2): Vec2 {
+    const x = this.x * a.y;
+    const y = this.y * a.y;
+    return new Vec2(x, y);
+  }
+
+  divide(a: Vec2): Vec2 {
+    const x = this.x / a.y;
+    const y = this.y / a.y;
+    return new Vec2(x, y);
+  }
+
+  modulo(a: Vec2): Vec2 {
     const x = this.x % a.x;
     const y = this.y % a.y;
     return new Vec2(x, y);
   }
 
-  abs() {
+  min(a: Vec2): Vec2 {
+    const x = Math.min(this.x, a.x);
+    const y = Math.min(this.y, a.y);
+    return new Vec2(x, y);
+  }
+
+  max(a: Vec2): Vec2 {
+    const x = Math.max(this.x, a.x);
+    const y = Math.max(this.y, a.y);
+    return new Vec2(x, y);
+  }
+
+  lerp(a: Vec2, t: number): Vec2 {
+    const x = this.x + t * (a.x - this.x);
+    const y = this.y + t * (a.y - this.y);
+    return new Vec2(x, y);
+  }
+
+  dot(a: Vec2): number {
+    return this.x * a.x + this.y * a.y;
+  }
+
+  len(): number {
+    return Math.sqrt(this.x ** 2 + this.y ** 2);
+  }
+
+  abs(): Vec2 {
     const x = Math.abs(this.x);
     const y = Math.abs(this.y);
     return new Vec2(x, y);
@@ -42,14 +95,8 @@ export default class Vec2 {
 }
 
 const vec2Methods = [
-  "add",
-  "subtract",
-  "multiply",
-  "divide",
   "ceil",
   "floor",
-  "min",
-  "max",
   "round",
   "scale",
   "scaleAndAdd",
@@ -90,6 +137,13 @@ const aliases = {
   sqrLen: "squaredLength",
 };
 
+interface Vec2 {
+  sub: typeof Vec2.prototype.subtract;
+  mul: typeof Vec2.prototype.multiply;
+  div: typeof Vec2.prototype.divide;
+  mod: typeof Vec2.prototype.modulo;
+}
+
 for (const method of vec2Methods) {
   Vec2.prototype[method] = function (...args) {
     const out = new Vec2();
@@ -115,3 +169,5 @@ for (const method of voidMethods) {
 for (const [from, to] of Object.entries(aliases)) {
   Vec2.prototype[from] = Vec2.prototype[to];
 }
+
+export default Vec2;

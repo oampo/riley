@@ -4,6 +4,15 @@ import Quat from "./quat";
 import Vec3 from "./vec3";
 
 export default class Quat2 {
+  rx: number;
+  ry: number;
+  rz: number;
+  rw: number;
+  dx: number;
+  dy: number;
+  dz: number;
+  dw: number;
+
   constructor(rx = 0, ry = 0, rz = 0, rw = 1, dx = 0, dy = 0, dz = 0, dw = 0) {
     this.rx = rx;
     this.ry = ry;
@@ -32,60 +41,60 @@ export default class Quat2 {
     return this.rx;
   }
 
-  get ["1"]() {
-    return this.ry;
-  }
-
-  get ["2"]() {
-    return this.rz;
-  }
-
-  get ["3"]() {
-    return this.rw;
-  }
-
-  get ["4"]() {
-    return this.dx;
-  }
-
-  get ["5"]() {
-    return this.dy;
-  }
-
-  get ["6"]() {
-    return this.dz;
-  }
-
-  get ["7"]() {
-    return this.dw;
-  }
-
   set ["0"](value) {
     this.rx = value;
+  }
+
+  get ["1"]() {
+    return this.ry;
   }
 
   set ["1"](value) {
     this.ry = value;
   }
 
+  get ["2"]() {
+    return this.rz;
+  }
+
   set ["2"](value) {
     this.rz = value;
+  }
+
+  get ["3"]() {
+    return this.rw;
   }
 
   set ["3"](value) {
     this.rw = value;
   }
 
+  get ["4"]() {
+    return this.dx;
+  }
+
   set ["4"](value) {
     this.dx = value;
+  }
+
+  get ["5"]() {
+    return this.dy;
   }
 
   set ["5"](value) {
     this.dy = value;
   }
 
+  get ["6"]() {
+    return this.dz;
+  }
+
   set ["6"](value) {
     this.dz = value;
+  }
+
+  get ["7"]() {
+    return this.dw;
   }
 
   set ["7"](value) {

@@ -1,6 +1,11 @@
 import { vec4 } from "gl-matrix";
 
 export default class Vec4 {
+  x: number;
+  y: number;
+  z: number;
+  w: number;
+
   constructor(x = 0, y = 0, z = 0, w = 0) {
     this.x = x;
     this.y = y;
@@ -16,28 +21,28 @@ export default class Vec4 {
     return this.x;
   }
 
-  get ["1"]() {
-    return this.y;
-  }
-
-  get ["2"]() {
-    return this.z;
-  }
-
-  get ["3"]() {
-    return this.w;
-  }
-
   set ["0"](value) {
     this.x = value;
+  }
+
+  get ["1"]() {
+    return this.y;
   }
 
   set ["1"](value) {
     this.y = value;
   }
 
+  get ["2"]() {
+    return this.z;
+  }
+
   set ["2"](value) {
     this.z = value;
+  }
+
+  get ["3"]() {
+    return this.w;
   }
 
   set ["3"](value) {
@@ -48,28 +53,28 @@ export default class Vec4 {
     return this.x;
   }
 
-  get g() {
-    return this.y;
-  }
-
-  get b() {
-    return this.z;
-  }
-
-  get a() {
-    return this.w;
-  }
-
   set r(value) {
     this.x = value;
+  }
+
+  get g() {
+    return this.y;
   }
 
   set g(value) {
     this.y = value;
   }
 
+  get b() {
+    return this.z;
+  }
+
   set b(value) {
     this.z = value;
+  }
+
+  get a() {
+    return this.w;
   }
 
   set a(value) {
@@ -90,6 +95,10 @@ export default class Vec4 {
     const z = Math.abs(this.z);
     const w = Math.abs(this.w);
     return new Vec4(x, y, z, w);
+  }
+
+  dot(a: Vec4): number {
+    return this.x * a.x + this.y * a.y + this.z * a.z + this.w * a.w;
   }
 }
 

@@ -1,6 +1,6 @@
 import { vec2 } from "./math";
 import { line } from "./shape";
-import { spatialHashRastered } from "./spatial-hash";
+import { spatialHashRastered, SpatialHash } from "./spatial-hash";
 
 export function boundingBox(line) {
   if (!line.vertices.length) {
@@ -72,7 +72,12 @@ function lineIntersectsLineBruteForce(lineA, lineB) {
   return intersections;
 }
 
-function lineIntersectsLineHashed(lineA, lineB, hashA, hashB) {
+function lineIntersectsLineHashed(
+  lineA,
+  lineB,
+  hashA: SpatialHash,
+  hashB: SpatialHash
+) {
   const { vertices: verticesA } = lineA;
   const { vertices: verticesB } = lineB;
   const intersections = [];
@@ -126,10 +131,16 @@ function lineIntersectsLineHashed(lineA, lineB, hashA, hashB) {
   return intersections;
 }
 
+interface LineIntersectsLineOptions {
+  sort?: boolean;
+  hashA?: SpatialHash;
+  hashB?: SpatialHash;
+}
+
 export function lineIntersectsLine(
   lineA,
   lineB,
-  { sort = false, hashA, hashB } = {}
+  { sort = false, hashA, hashB }: LineIntersectsLineOptions = {}
 ) {
   const { vertices: verticesA } = lineA;
 

@@ -1,6 +1,13 @@
 import { mat2d } from "gl-matrix";
 
 export default class Mat2d {
+  m00: number;
+  m01: number;
+  m10: number;
+  m11: number;
+  m20: number;
+  m21: number;
+
   constructor(m00 = 1, m01 = 0, m10 = 0, m11 = 1, m20 = 0, m21 = 0) {
     this.m00 = m00;
     this.m01 = m01;
@@ -25,44 +32,44 @@ export default class Mat2d {
     return this.m00;
   }
 
-  get ["1"]() {
-    return this.m01;
-  }
-
-  get ["2"]() {
-    return this.m10;
-  }
-
-  get ["3"]() {
-    return this.m11;
-  }
-
-  get ["4"]() {
-    return this.m20;
-  }
-
-  get ["5"]() {
-    return this.m21;
-  }
-
   set ["0"](value) {
     this.m00 = value;
+  }
+
+  get ["1"]() {
+    return this.m01;
   }
 
   set ["1"](value) {
     this.m01 = value;
   }
 
+  get ["2"]() {
+    return this.m10;
+  }
+
   set ["2"](value) {
     this.m10 = value;
+  }
+
+  get ["3"]() {
+    return this.m11;
   }
 
   set ["3"](value) {
     this.m11 = value;
   }
 
+  get ["4"]() {
+    return this.m20;
+  }
+
   set ["4"](value) {
     this.m20 = value;
+  }
+
+  get ["5"]() {
+    return this.m21;
   }
 
   set ["5"](value) {

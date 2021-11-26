@@ -10,7 +10,7 @@ export function scale(line, scale) {
   return line;
 }
 
-export function rotate(line, rotation, {center=vec2()}={}) {
+export function rotate(line, rotation, { center = vec2() } = {}) {
   line.vertices = line.vertices.map((v) => v.rotate(center, rotation));
   return line;
 }

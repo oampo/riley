@@ -4,6 +4,23 @@ import Vec3 from "./vec3";
 import Quat from "./quat";
 
 export default class Mat4 {
+  m00: number;
+  m01: number;
+  m02: number;
+  m03: number;
+  m10: number;
+  m11: number;
+  m12: number;
+  m13: number;
+  m20: number;
+  m21: number;
+  m22: number;
+  m23: number;
+  m30: number;
+  m31: number;
+  m32: number;
+  m33: number;
+
   constructor(
     m00 = 1,
     m01 = 0,
@@ -65,124 +82,124 @@ export default class Mat4 {
     return this.m00;
   }
 
-  get ["1"]() {
-    return this.m01;
-  }
-
-  get ["2"]() {
-    return this.m02;
-  }
-
-  get ["3"]() {
-    return this.m03;
-  }
-
-  get ["4"]() {
-    return this.m10;
-  }
-
-  get ["5"]() {
-    return this.m11;
-  }
-
-  get ["6"]() {
-    return this.m12;
-  }
-
-  get ["7"]() {
-    return this.m13;
-  }
-
-  get ["8"]() {
-    return this.m20;
-  }
-
-  get ["9"]() {
-    return this.m21;
-  }
-
-  get ["10"]() {
-    return this.m22;
-  }
-
-  get ["11"]() {
-    return this.m23;
-  }
-
-  get ["12"]() {
-    return this.m30;
-  }
-
-  get ["13"]() {
-    return this.m31;
-  }
-
-  get ["14"]() {
-    return this.m32;
-  }
-
-  get ["15"]() {
-    return this.m33;
-  }
-
   set ["0"](value) {
     this.m00 = value;
+  }
+
+  get ["1"]() {
+    return this.m01;
   }
 
   set ["1"](value) {
     this.m01 = value;
   }
 
+  get ["2"]() {
+    return this.m02;
+  }
+
   set ["2"](value) {
     this.m02 = value;
+  }
+
+  get ["3"]() {
+    return this.m03;
   }
 
   set ["3"](value) {
     this.m03 = value;
   }
 
+  get ["4"]() {
+    return this.m10;
+  }
+
   set ["4"](value) {
     this.m10 = value;
+  }
+
+  get ["5"]() {
+    return this.m11;
   }
 
   set ["5"](value) {
     this.m11 = value;
   }
 
+  get ["6"]() {
+    return this.m12;
+  }
+
   set ["6"](value) {
     this.m12 = value;
+  }
+
+  get ["7"]() {
+    return this.m13;
   }
 
   set ["7"](value) {
     this.m13 = value;
   }
 
+  get ["8"]() {
+    return this.m20;
+  }
+
   set ["8"](value) {
     this.m20 = value;
+  }
+
+  get ["9"]() {
+    return this.m21;
   }
 
   set ["9"](value) {
     this.m21 = value;
   }
 
+  get ["10"]() {
+    return this.m22;
+  }
+
   set ["10"](value) {
     this.m22 = value;
+  }
+
+  get ["11"]() {
+    return this.m23;
   }
 
   set ["11"](value) {
     this.m23 = value;
   }
 
+  get ["12"]() {
+    return this.m30;
+  }
+
   set ["12"](value) {
     this.m30 = value;
+  }
+
+  get ["13"]() {
+    return this.m31;
   }
 
   set ["13"](value) {
     this.m31 = value;
   }
 
+  get ["14"]() {
+    return this.m32;
+  }
+
   set ["14"](value) {
     this.m32 = value;
+  }
+
+  get ["15"]() {
+    return this.m33;
   }
 
   set ["15"](value) {

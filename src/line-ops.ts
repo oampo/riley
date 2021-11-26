@@ -1,7 +1,7 @@
 export function clone(line) {
   return {
     vertices: [...line.vertices],
-    ...line
+    ...line,
   };
 }
 

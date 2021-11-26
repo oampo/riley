@@ -21,7 +21,7 @@ function rasterSegmentAmanatidesWoo(
 ) {
   start = start.div(gridSize);
   end = end.div(gridSize);
-  let cell = start.floor();
+  const cell = start.floor();
   const cells = [cell.clone()];
   const endCell = end.floor();
 
@@ -56,7 +56,7 @@ function rasterSegmentBresenham(start, end, { gridSize = vec2(1, 1) } = {}) {
 
   let error = diff.x + diff.y;
 
-  let cell = start.clone();
+  const cell = start.clone();
   const cells = [cell.clone()];
   while (!cell.equals(end)) {
     const error2 = 2 * error;

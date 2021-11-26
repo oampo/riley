@@ -2,6 +2,11 @@ import { quat } from "gl-matrix";
 import Vec3 from "./vec3";
 
 export default class Quat {
+  x: number;
+  y: number;
+  z: number;
+  w: number;
+
   constructor(x = 0, y = 0, z = 0, w = 1) {
     this.x = x;
     this.y = y;
@@ -17,28 +22,28 @@ export default class Quat {
     return this.x;
   }
 
-  get ["1"]() {
-    return this.y;
-  }
-
-  get ["2"]() {
-    return this.z;
-  }
-
-  get ["3"]() {
-    return this.w;
-  }
-
   set ["0"](value) {
     this.x = value;
+  }
+
+  get ["1"]() {
+    return this.y;
   }
 
   set ["1"](value) {
     this.y = value;
   }
 
+  get ["2"]() {
+    return this.z;
+  }
+
   set ["2"](value) {
     this.z = value;
+  }
+
+  get ["3"]() {
+    return this.w;
   }
 
   set ["3"](value) {

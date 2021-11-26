@@ -3,6 +3,16 @@ import knn from "rbush-knn";
 
 import config from "./config";
 
+interface RTreeNode {
+  minX: number;
+  minY: number;
+  maxX: number;
+  maxY: number;
+  index: number;
+  isEnd: boolean;
+  partner?: RTreeNode;
+}
+
 export function spatialSort(lines) {
   if (lines.length <= 1) {
     return lines;
@@ -23,7 +33,7 @@ export function spatialSort(lines) {
     const start = line.vertices[0];
     const end = line.vertices[line.vertices.length - 1];
 
-    const startNode = {
+    const startNode: RTreeNode = {
       minX: start.x,
       minY: start.y,
       maxX: start.x,
@@ -32,7 +42,7 @@ export function spatialSort(lines) {
       isEnd: false,
     };
 
-    const endNode = {
+    const endNode: RTreeNode = {
       minX: end.x,
       minY: end.y,
       maxX: end.x,

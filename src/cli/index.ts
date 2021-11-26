@@ -120,7 +120,7 @@ async function setPackageName(dir) {
     .replace(/[^a-zA-Z0-9-]/g, "");
   await fs.writeFile(
     packageJsonPath,
-    JSON.stringify(packageJson, "", 2) + "\n"
+    JSON.stringify(packageJson, undefined, 2) + "\n"
   );
 }
 

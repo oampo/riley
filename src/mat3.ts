@@ -1,6 +1,16 @@
 import { mat3 } from "gl-matrix";
 
 export default class Mat3 {
+  m00: number;
+  m01: number;
+  m02: number;
+  m10: number;
+  m11: number;
+  m12: number;
+  m20: number;
+  m21: number;
+  m22: number;
+
   constructor(
     m00 = 1,
     m01 = 0,
@@ -41,68 +51,68 @@ export default class Mat3 {
     return this.m00;
   }
 
-  get ["1"]() {
-    return this.m01;
-  }
-
-  get ["2"]() {
-    return this.m02;
-  }
-
-  get ["3"]() {
-    return this.m10;
-  }
-
-  get ["4"]() {
-    return this.m11;
-  }
-
-  get ["5"]() {
-    return this.m12;
-  }
-
-  get ["6"]() {
-    return this.m20;
-  }
-
-  get ["7"]() {
-    return this.m21;
-  }
-
-  get ["8"]() {
-    return this.m22;
-  }
-
   set ["0"](value) {
     this.m00 = value;
+  }
+
+  get ["1"]() {
+    return this.m01;
   }
 
   set ["1"](value) {
     this.m01 = value;
   }
 
+  get ["2"]() {
+    return this.m02;
+  }
+
   set ["2"](value) {
     this.m02 = value;
+  }
+
+  get ["3"]() {
+    return this.m10;
   }
 
   set ["3"](value) {
     this.m10 = value;
   }
 
+  get ["4"]() {
+    return this.m11;
+  }
+
   set ["4"](value) {
     this.m11 = value;
+  }
+
+  get ["5"]() {
+    return this.m12;
   }
 
   set ["5"](value) {
     this.m12 = value;
   }
 
+  get ["6"]() {
+    return this.m20;
+  }
+
   set ["6"](value) {
     this.m20 = value;
   }
 
+  get ["7"]() {
+    return this.m21;
+  }
+
   set ["7"](value) {
     this.m21 = value;
+  }
+
+  get ["8"]() {
+    return this.m22;
   }
 
   set ["8"](value) {

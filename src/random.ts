@@ -13,11 +13,11 @@ export function random(low = 0, high = 1) {
   return low + rng() * (high - low);
 }
 
-export function randomInt(low=0, high=2) {
+export function randomInt(low = 0, high = 2) {
   return Math.floor(random(low, high));
 }
 
-export function gaussian(mean=0, variance=1) {
+export function gaussian(mean = 0, variance = 1) {
   const r1 = random();
   const r2 = random();
 

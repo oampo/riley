@@ -8,47 +8,59 @@ import Mat4 from "./mat4";
 import Quat from "./quat";
 import Quat2 from "./quat2";
 
-export function vec2(x, y) {
+export { Vec2, Vec3, Vec4, Mat2, Mat2d, Mat3, Mat4, Quat, Quat2 };
+
+export function vec2(x = 0, y = 0) {
   return new Vec2(x, y);
 }
 
-export function vec3(x, y, z) {
+export function vec3(x = 0, y = 0, z = 0) {
   return new Vec3(x, y, z);
 }
 
-export function vec4(x, y, z, w) {
+export function vec4(x = 0, y = 0, z = 0, w = 0) {
   return new Vec4(x, y, z, w);
 }
 
-export function mat2(m00, m01, m10, m11) {
+export function mat2(m00 = 1, m01 = 0, m10 = 0, m11 = 1) {
   return new Mat2(m00, m01, m10, m11);
 }
 
-export function mat2d(m00, m01, m10, m11, m20, m21) {
+export function mat2d(m00 = 1, m01 = 0, m10 = 0, m11 = 1, m20 = 0, m21 = 0) {
   return new Mat2d(m00, m01, m10, m11, m20, m21);
 }
 
-export function mat3(m00, m01, m02, m10, m11, m12, m20, m21, m22) {
+export function mat3(
+  m00 = 1,
+  m01 = 0,
+  m02 = 0,
+  m10 = 0,
+  m11 = 1,
+  m12 = 0,
+  m20 = 0,
+  m21 = 0,
+  m22 = 1
+) {
   return new Mat3(m00, m01, m02, m10, m11, m12, m20, m21, m22);
 }
 
 export function mat4(
-  m00,
-  m01,
-  m02,
-  m03,
-  m10,
-  m11,
-  m12,
-  m13,
-  m20,
-  m21,
-  m22,
-  m23,
-  m30,
-  m31,
-  m32,
-  m33
+  m00 = 1,
+  m01 = 0,
+  m02 = 0,
+  m03 = 0,
+  m10 = 0,
+  m11 = 1,
+  m12 = 0,
+  m13 = 0,
+  m20 = 0,
+  m21 = 0,
+  m22 = 1,
+  m23 = 0,
+  m30 = 0,
+  m31 = 0,
+  m32 = 0,
+  m33 = 1
 ) {
   return new Mat4(
     m00,
