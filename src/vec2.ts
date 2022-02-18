@@ -1,6 +1,6 @@
-import { vec2 } from "gl-matrix";
-
 import Vec3 from "./vec3";
+import Mat3 from "./mat3";
+import { floatEq } from "./math";
 
 class Vec2 {
   x: number;
@@ -13,22 +13,6 @@ class Vec2 {
 
   clone() {
     return new Vec2(this.x, this.y);
-  }
-
-  get ["0"]() {
-    return this.x;
-  }
-
-  set ["0"](value) {
-    this.x = value;
-  }
-
-  get ["1"]() {
-    return this.y;
-  }
-
-  set ["1"](value) {
-    this.y = value;
   }
 
   add(a: Vec2): Vec2 {
@@ -73,18 +57,62 @@ class Vec2 {
     return new Vec2(x, y);
   }
 
+  cross(a: Vec2): Vec3 {
+    const z = this.x * a.y - this.y * a.x;
+    return new Vec3(0, 0, z);
+  }
+
+  scale(s: number): Vec2 {
+    const x = this.x * s;
+    const y = this.y * s;
+    return new Vec2(x, y);
+  }
+
   lerp(a: Vec2, t: number): Vec2 {
     const x = this.x + t * (a.x - this.x);
     const y = this.y + t * (a.y - this.y);
     return new Vec2(x, y);
   }
 
+  rotate(center: Vec2, angle: number): Vec2 {
+    const x0 = this.x - center.x;
+    const y0 = this.y - center.y;
+    const sinAngle = Math.sin(angle);
+    const cosAngle = Math.cos(angle);
+
+    const x = x0 * cosAngle - y0 * sinAngle + center.x;
+    const y = x0 * sinAngle - y0 * cosAngle + center.y;
+    return new Vec2(x, y);
+  }
+
+  transformMat3(a: Mat3): Vec2 {
+    const x = this.x * a.m00 + this.y * a.m10 + a.m20;
+    const y = this.x * a.m01 + this.y * a.m11 + a.m21;
+    return new Vec2(x, y);
+  }
+
+  distance(a: Vec2): number {
+    const dx = this.x - a.x;
+    const dy = this.y - a.y;
+    return Math.sqrt(dx ** 2 + dy ** 2);
+  }
+
+  squaredDistance(a: Vec2): number {
+    const dx = this.x - a.x;
+    const dy = this.y - a.y;
+    return dx ** 2 + dy ** 2;
+  }
+
   dot(a: Vec2): number {
     return this.x * a.x + this.y * a.y;
   }
 
-  len(): number {
-    return Math.sqrt(this.x ** 2 + this.y ** 2);
+  equals(a: Vec2): boolean {
+    return floatEq(this.x, a.x) && floatEq(this.y, a.y);
+  }
+
+  exactEquals(a: Vec2): boolean {
+    return this.x === a.x && this.y === a.y;
   }
 
   abs(): Vec2 {
@@ -92,82 +120,57 @@ class Vec2 {
     const y = Math.abs(this.y);
     return new Vec2(x, y);
   }
+
+  floor(): Vec2 {
+    const x = Math.floor(this.x);
+    const y = Math.floor(this.y);
+    return new Vec2(x, y);
+  }
+
+  ceil(): Vec2 {
+    const x = Math.ceil(this.x);
+    const y = Math.ceil(this.y);
+    return new Vec2(x, y);
+  }
+
+  normalize(): Vec2 {
+    const length = Math.sqrt(this.x ** 2 + this.y ** 2);
+    if (length === 0) {
+      return new Vec2(0, 0);
+    }
+    const invLength = 1 / length;
+    const x = this.x * invLength;
+    const y = this.y * invLength;
+    return new Vec2(x, y);
+  }
+
+  length(): number {
+    return Math.sqrt(this.x ** 2 + this.y ** 2);
+  }
+
+  squaredLength(): number {
+    return this.x ** 2 + this.y ** 2;
+  }
 }
-
-const vec2Methods = [
-  "ceil",
-  "floor",
-  "round",
-  "scale",
-  "scaleAndAdd",
-  "negate",
-  "inverse",
-  "normalize",
-  "lerp",
-  "random",
-  "transformMat2",
-  "transformMat2d",
-  "transformMat3",
-  "transformMat4",
-  "rotate",
-];
-
-const vec3Methods = ["cross"];
-
-const voidMethods = [
-  "distance",
-  "squaredDistance",
-  "length",
-  "squaredLength",
-  "dot",
-  "angle",
-  "str",
-  "exactEquals",
-  "equals",
-];
-
-const aliases = {
-  sub: "subtract",
-  mul: "multiply",
-  div: "divide",
-  mod: "modulo",
-  dist: "distance",
-  sqrDist: "squaredDistance",
-  len: "length",
-  sqrLen: "squaredLength",
-};
 
 interface Vec2 {
   sub: typeof Vec2.prototype.subtract;
   mul: typeof Vec2.prototype.multiply;
   div: typeof Vec2.prototype.divide;
   mod: typeof Vec2.prototype.modulo;
+  len: typeof Vec2.prototype.length;
+  sqrLen: typeof Vec2.prototype.squaredLength;
+  dist: typeof Vec2.prototype.distance;
+  sqrDist: typeof Vec2.prototype.squaredDistance;
 }
 
-for (const method of vec2Methods) {
-  Vec2.prototype[method] = function (...args) {
-    const out = new Vec2();
-    vec2[method](out, this, ...args);
-    return out;
-  };
-}
-
-for (const method of vec3Methods) {
-  Vec2.prototype[method] = function (...args) {
-    const out = new Vec3();
-    vec2[method](out, this, ...args);
-    return out;
-  };
-}
-
-for (const method of voidMethods) {
-  Vec2.prototype[method] = function (...args) {
-    return vec2[method](this, ...args);
-  };
-}
-
-for (const [from, to] of Object.entries(aliases)) {
-  Vec2.prototype[from] = Vec2.prototype[to];
-}
+Vec2.prototype.sub = Vec2.prototype.subtract;
+Vec2.prototype.mul = Vec2.prototype.multiply;
+Vec2.prototype.div = Vec2.prototype.divide;
+Vec2.prototype.mod = Vec2.prototype.modulo;
+Vec2.prototype.len = Vec2.prototype.length;
+Vec2.prototype.sqrLen = Vec2.prototype.squaredLength;
+Vec2.prototype.dist = Vec2.prototype.distance;
+Vec2.prototype.sqrDist = Vec2.prototype.squaredDistance;
 
 export default Vec2;

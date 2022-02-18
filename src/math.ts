@@ -1,3 +1,5 @@
+import config from "./config";
+
 import Vec2 from "./vec2";
 import Vec3 from "./vec3";
 import Vec4 from "./vec4";
@@ -82,11 +84,20 @@ export function mat4(
   );
 }
 
-export function quat(x, y, z, w) {
+export function quat(x = 0, y = 0, z = 0, w = 1): Quat {
   return new Quat(x, y, z, w);
 }
 
-export function quat2(rx, ry, rz, rw, dx, dy, dz, dw) {
+export function quat2(
+  rx = 0,
+  ry = 0,
+  rz = 0,
+  rw = 0,
+  dx = 0,
+  dy = 0,
+  dz = 0,
+  dw = 1
+): Quat2 {
   return new Quat2(rx, ry, rz, rw, dx, dy, dz, dw);
 }
 
@@ -117,4 +128,19 @@ export function smoothstep(a, b, x) {
 export function smootherstep(a, b, x) {
   x = clamp((x - a) / (b - a), 0, 1);
   return x * x * x * (x * (x * 6 - 15) + 10);
+}
+
+export function floatEq(
+  a: number,
+  b: number,
+  {
+    epsilon = config.epsilon,
+    threshold = config.absoluteComparisonThreshold,
+  } = {}
+) {
+  if (a === b) return true;
+
+  const diff = Math.abs(a - b);
+  const norm = Math.min(Math.abs(a + b), Number.MAX_VALUE);
+  return diff < Math.max(threshold, epsilon * norm);
 }

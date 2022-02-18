@@ -14,6 +14,8 @@ export default {
   backgroundColor: vec4(1, 1, 1, 1),
   timestep: 1 / 60,
   defaultResolution: 2,
+  epsilon: Number.EPSILON * 128,
+  absoluteComparisonThreshold: Number.MIN_VALUE,
   seed: nanoid(),
   size: undefined,
 };
