@@ -101,13 +101,19 @@ export function quat2(
   return new Quat2(rx, ry, rz, rw, dx, dy, dz, dw);
 }
 
-export function remap(value, fromStart, fromStop, toStart, toStop) {
+export function remap(
+  value: number,
+  fromStart: number,
+  fromStop: number,
+  toStart: number,
+  toStop: number
+): number {
   const fromRange = fromStop - fromStart;
   const toRange = toStop - toStart;
   return toStart + (toRange * (value - fromStart)) / fromRange;
 }
 
-export function clamp(a, min, max) {
+export function clamp(a: number, min: number, max: number) {
   if (a < min) {
     return min;
   } else if (a > max) {
@@ -116,19 +122,25 @@ export function clamp(a, min, max) {
   return a;
 }
 
-export function lerp(a, b, x) {
-  return a + x * (b - a);
-}
+export type FirstOrderInterpolationFn = (
+  a: number,
+  b: number,
+  x: number
+) => number;
 
-export function smoothstep(a, b, x) {
+export const lerp: FirstOrderInterpolationFn = function (a, b, x) {
+  return a + x * (b - a);
+};
+
+export const smoothstep: FirstOrderInterpolationFn = function (a, b, x) {
   x = clamp((x - a) / (b - a), 0, 1);
   return x * x * (3 - 2 * x);
-}
+};
 
-export function smootherstep(a, b, x) {
+export const smootherstep: FirstOrderInterpolationFn = function (a, b, x) {
   x = clamp((x - a) / (b - a), 0, 1);
   return x * x * x * (x * (x * 6 - 15) + 10);
-}
+};
 
 export function floatEq(
   a: number,

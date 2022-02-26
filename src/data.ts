@@ -1,6 +1,6 @@
 import Vec4 from "./vec4";
 
-export function hex(x) {
+export function hex(x: Vec4): string {
   if (!(x instanceof Vec4)) {
     throw new Error(`Could not convert value to hex: ${x}`);
   }
@@ -21,7 +21,7 @@ export function hex(x) {
   );
 }
 
-export function rgbHex(x) {
+export function rgbHex(x: Vec4): string {
   if (!(x instanceof Vec4)) {
     throw new Error(`Could not convert value to hex: ${x}`);
   }

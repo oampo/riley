@@ -1,4 +1,4 @@
-import Line from "./line";
+import type { Line } from "./line";
 import { Vec2 } from "./math";
 
 export function vertices(line: Line): Vec2[];

@@ -1,16 +1,9 @@
 import config from "./config";
-import { vec2 } from "./math";
+import { vec2, Vec2 } from "./math";
+import line from "./line";
+import type { Line } from "./line";
 
-export function line(...vertices) {
-  return {
-    vertices,
-    color: config.defaultColor,
-    weight: config.defaultWeight,
-    layer: 0,
-  };
-}
-
-export function rect(center, size) {
+export function rect(center: Vec2, size: Vec2): Line {
   return line(
     vec2(center.x - size.x / 2, center.y - size.y / 2),
     vec2(center.x - size.x / 2, center.y + size.y / 2),
@@ -20,11 +13,15 @@ export function rect(center, size) {
   );
 }
 
+interface CurveOptions {
+  resolution?: number;
+}
+
 export function circle(
-  center,
-  radius,
-  { resolution = config.defaultResolution } = {}
-) {
+  center: Vec2,
+  radius: number,
+  { resolution = config.defaultResolution }: CurveOptions = {}
+): Line {
   const circumference = 2 * Math.PI * radius;
   const numVertices = Math.floor(circumference / resolution);
   const segmentAngle = (2 * Math.PI) / numVertices;
@@ -42,12 +39,12 @@ export function circle(
 }
 
 export function circularArc(
-  center,
-  radius,
-  fromAngle,
-  toAngle,
-  { resolution = config.defaultResolution } = {}
-) {
+  center: Vec2,
+  radius: number,
+  fromAngle: number,
+  toAngle: number,
+  { resolution = config.defaultResolution }: CurveOptions = {}
+): Line {
   const arcLength = (toAngle - fromAngle) * radius;
   const numVertices = Math.floor(arcLength / resolution);
   const segmentAngle = (toAngle - fromAngle) / numVertices;
@@ -64,7 +61,7 @@ export function circularArc(
   return line(...vertices);
 }
 
-function ellipseCircumference(size) {
+function ellipseCircumference(size: Vec2): number {
   // Ramanujan approximation for ellipse circumference
   const h = (size.x - size.y) / (size.x + size.y);
   return (
@@ -75,10 +72,10 @@ function ellipseCircumference(size) {
 }
 
 export function ellipse(
-  center,
-  size,
-  { resolution = config.defaultResolution } = {}
-) {
+  center: Vec2,
+  size: Vec2,
+  { resolution = config.defaultResolution }: CurveOptions = {}
+): Line {
   const circumference = ellipseCircumference(size);
   const numVertices = Math.floor(circumference / resolution);
   const segmentAngle = (2 * Math.PI) / numVertices;
@@ -96,12 +93,12 @@ export function ellipse(
 }
 
 export function ellipticalArc(
-  center,
-  size,
-  fromAngle,
-  toAngle,
-  { resolution = config.defaultResolution } = {}
-) {
+  center: Vec2,
+  size: Vec2,
+  fromAngle: number,
+  toAngle: number,
+  { resolution = config.defaultResolution }: CurveOptions = {}
+): Line {
   // Work out the number of vertices and segmetn angle for the entire ellipse
   const circumference = ellipseCircumference(size);
   const numVertices = Math.floor(circumference / resolution);
@@ -122,13 +119,15 @@ export function ellipticalArc(
   return line(...vertices);
 }
 
+type BezierOptions = CurveOptions & { recursion?: number };
+
 function _bezier(
-  p1,
-  p2,
-  p3,
-  p4,
-  { resolution = config.defaultResolution, recursion = 8 } = {}
-) {
+  p1: Vec2,
+  p2: Vec2,
+  p3: Vec2,
+  p4: Vec2,
+  { resolution = config.defaultResolution, recursion = 8 }: BezierOptions = {}
+): Vec2[] {
   if (recursion < 0) {
     return [];
   }
@@ -180,6 +179,12 @@ function _bezier(
   return [...left, ...right.slice(1)];
 }
 
-export function bezier(start, c1, c2, end, options) {
+export function bezier(
+  start: Vec2,
+  c1: Vec2,
+  c2: Vec2,
+  end: Vec2,
+  options: BezierOptions
+): Line {
   return line(..._bezier(start, c1, c2, end, options));
 }

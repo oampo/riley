@@ -19,13 +19,14 @@ import { hideBin } from "yargs/helpers";
 const glob = promisify(globCb);
 
 function parseArgs() {
-  return yargs(hideBin(process.argv))
+  const args = yargs(hideBin(process.argv))
     .command("create", "Create a new sketchbook or sketch", (yargs) => {
       return yargs
         .command("sketchbook <path>", "Create a new sketchbook", (yargs) => {
           return yargs
             .positional("path", {
               describe: "The path to create the sketchbook",
+              type: "string",
             })
             .demandOption("path");
         })
@@ -36,6 +37,7 @@ function parseArgs() {
             return yargs
               .positional("name", {
                 describe: "The name of the sketch",
+                type: "string",
               })
               .option("directory", {
                 alias: "d",
@@ -60,14 +62,17 @@ function parseArgs() {
     .demandCommand()
     .strict()
     .help().argv;
+
+  return Promise.resolve(args);
 }
 
-async function getTemplateDir(templateName) {
+async function getTemplateDir(templateName: string): Promise<string> {
   const root = await pkgDir(fileURLToPath(import.meta.url));
+  if (!root) throw new Error("Could not find package directory");
   return path.join(root, "templates", templateName);
 }
 
-async function copyTemplate(from, to) {
+async function copyTemplate(from: string, to: string): Promise<void> {
   await fs.ensureDir(to);
   const files = await fs.readdir(to);
   if (files.length) {
@@ -79,7 +84,7 @@ async function copyTemplate(from, to) {
   });
 }
 
-function npmInstall(dir) {
+function npmInstall(dir: string): void {
   console.log("Installing dependencies");
   const cwd = process.cwd();
   process.chdir(dir);
@@ -87,7 +92,7 @@ function npmInstall(dir) {
   process.chdir(cwd);
 }
 
-function gitInit(dir) {
+function gitInit(dir: string): void {
   console.log("Initialising git repository");
   try {
     execSync(`git init ${dir}`, { stdio: "inherit" });
@@ -96,7 +101,7 @@ function gitInit(dir) {
   }
 }
 
-function gitCommit(dir) {
+function gitCommit(dir: string): void {
   const cwd = process.cwd();
   process.chdir(dir);
   try {
@@ -109,7 +114,7 @@ function gitCommit(dir) {
   }
 }
 
-async function setPackageName(dir) {
+async function setPackageName(dir: string): Promise<void> {
   const packageJsonPath = path.join(dir, "package.json");
   const data = await fs.readFile(packageJsonPath, "utf-8");
   const packageJson = JSON.parse(data);
@@ -124,7 +129,7 @@ async function setPackageName(dir) {
   );
 }
 
-async function createSketchbook(dir) {
+async function createSketchbook(dir: string): Promise<void> {
   const templateDir = await getTemplateDir("sketchbook");
   await copyTemplate(templateDir, dir);
   await setPackageName(dir);
@@ -133,31 +138,36 @@ async function createSketchbook(dir) {
   gitCommit(dir);
 }
 
-async function createSketch(dir, name) {
+async function createSketch(dir: string, name: string): Promise<void> {
   const sketchDir = path.join(dir, name);
   const templateDir = await getTemplateDir("sketch");
   await copyTemplate(templateDir, sketchDir);
 }
 
-function isSubpath(dirA, dirB) {
+function isSubpath(dirA: string, dirB: string): boolean {
   const relative = path.relative(dirA, dirB);
-  return relative && !relative.startsWith("..") && !path.isAbsolute(relative);
+  return relative
+    ? !relative.startsWith("..") && !path.isAbsolute(relative)
+    : false;
 }
 
-async function startDevServer(dir) {
+async function startDevServer(dir: string): Promise<void> {
   const sketches = await glob(path.join(dir, "**", "src", "index.js"));
 
-  const entry = sketches.reduce((entry, sketch) => {
-    const sketchSegments = path.relative(dir, sketch).split(path.sep);
-    const sketchName = sketchSegments
-      // Slice off src/index.js
-      .slice(0, sketchSegments.length - 2)
-      .join("/");
-    return {
-      ...entry,
-      [sketchName]: `./${sketch}`,
-    };
-  }, {});
+  const entry = sketches.reduce(
+    (entry: { [name: string]: string }, sketch: string) => {
+      const sketchSegments = path.relative(dir, sketch).split(path.sep);
+      const sketchName = sketchSegments
+        // Slice off src/index.js
+        .slice(0, sketchSegments.length - 2)
+        .join("/");
+      return {
+        ...entry,
+        [sketchName]: `./${sketch}`,
+      };
+    },
+    {}
+  );
 
   const template = path.join(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -240,9 +250,9 @@ async function startDevServer(dir) {
   server.start();
 }
 
-async function main() {
+async function main(): Promise<void> {
   try {
-    const args = parseArgs();
+    const args = await parseArgs();
 
     const command = args._[0];
 
@@ -264,7 +274,9 @@ async function main() {
         break;
     }
   } catch (e) {
-    console.error(`Error: ${e.message}`);
+    if (e instanceof Error) {
+      console.error(`Error: ${e.message}`);
+    }
     process.exit(1);
   }
 }

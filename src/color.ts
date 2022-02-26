@@ -1,4 +1,4 @@
-import Line from "./line";
+import type { Line } from "./line";
 import { Vec4 } from "./math";
 
 export function color(line: Line): Vec4;

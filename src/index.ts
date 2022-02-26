@@ -1,8 +1,11 @@
+import type { Config, PaperSize, PaperOrientation } from "./config";
+import type { Line } from "./line";
+
 import config from "./config";
 import { layer, weight } from "./attribute";
 import { color, alpha } from "./color";
 import { hex, rgbHex } from "./data";
-import { vec2, Vec2 } from "./math";
+import { vec2, Vec2, Vec4 } from "./math";
 import { noiseSeed } from "./noise";
 import { spatialSort, mergeNearby } from "./optimize";
 import { randomSeed } from "./random";
@@ -39,7 +42,7 @@ const paperSizes = {
   A10: vec2(26, 37),
 };
 
-let lastUpdateTime;
+let lastUpdateTime: number;
 let playing = false;
 let frameCount = 0;
 let shouldExport = false;
@@ -48,7 +51,17 @@ function requestExport() {
   shouldExport = true;
 }
 
-function render(svg, draw, config) {
+type SetupFn = (config: Config) => void;
+type DrawFn = (config: Config) => Line | Line[];
+type UpdateFn = (timestep: number, config: Config) => void;
+
+interface Listeners {
+  setup: SetupFn;
+  draw: DrawFn;
+  update?: UpdateFn;
+}
+
+function render(svg: SVGElement, draw: DrawFn, config: Config) {
   const lines = draw(config);
   renderLines(svg, lines, shouldExport);
 
@@ -73,7 +86,7 @@ function render(svg, draw, config) {
   shouldExport = false;
 }
 
-function tick(draw, update, svg, config) {
+function tick(draw: DrawFn, update: UpdateFn, svg: SVGElement, config: Config) {
   if (!playing) {
     return;
   }
@@ -91,7 +104,12 @@ function tick(draw, update, svg, config) {
   requestAnimationFrame(() => tick(draw, update, svg, config));
 }
 
-function play(draw, update, svg, config) {
+function play(
+  draw: DrawFn,
+  update: UpdateFn | undefined,
+  svg: SVGElement,
+  config: Config
+) {
   if (!update) {
     throw new Error("Must have an update listener to play");
   }
@@ -104,7 +122,7 @@ function pause() {
   playing = false;
 }
 
-function getPaperSize(size: string | Vec2, orientation) {
+function getPaperSize(size: PaperSize, orientation: PaperOrientation) {
   let vecSize: Vec2;
 
   if (typeof size === "string") {
@@ -123,7 +141,7 @@ function getPaperSize(size: string | Vec2, orientation) {
   return vecSize;
 }
 
-function setSvgSize(svg, size) {
+function setSvgSize(svg: SVGElement, size: Vec2) {
   const { x: width, y: height } = size;
 
   svg.setAttribute("data-width", `${width}`);
@@ -133,14 +151,14 @@ function setSvgSize(svg, size) {
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
 }
 
-function createSvg(paperSize, backgroundColor) {
+function createSvg(paperSize: Vec2, backgroundColor: Vec4) {
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   setSvgSize(svg, paperSize);
   svg.style.backgroundColor = `#${hex(backgroundColor)}`;
   return svg;
 }
 
-function renderLines(svg, lines, optimize = false) {
+function renderLines(svg: SVGElement, lines: Line | Line[], optimize = false) {
   if (!Array.isArray(lines)) {
     lines = [lines];
   }
@@ -152,28 +170,32 @@ function renderLines(svg, lines, optimize = false) {
   lines.sort((a, b) => layer(a) - layer(b));
 
   const layerIds = [];
-  const linesByLayerId = {};
+  const linesByLayerId = new Map();
   for (const line of lines) {
     const layerId = layer(line);
-    if (!(layerId in linesByLayerId)) {
+    if (!linesByLayerId.has(layerId)) {
       layerIds.push(layerId);
-      linesByLayerId[layerId] = [line];
+      linesByLayerId.set(layerId, [line]);
       continue;
     }
 
-    linesByLayerId[layerId].push(line);
+    linesByLayerId.get(layerId).push(line);
   }
 
   const layers = [];
   for (const layerId of layerIds) {
-    let lines = linesByLayerId[layerId];
+    let lines = linesByLayerId.get(layerId);
     if (optimize) {
       lines = spatialSort(lines);
       lines = mergeNearby(lines);
     }
 
     const layer = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    layer.setAttributeNS("http://www.w3.org/2000/svg", "id", layerId);
+    layer.setAttributeNS(
+      "http://www.w3.org/2000/svg",
+      "id",
+      layerId.toString()
+    );
     layer.setAttributeNS(
       "http://www.inkscape.org/namespaces/inkscape",
       "inkscape:groupmode",
@@ -182,7 +204,7 @@ function renderLines(svg, lines, optimize = false) {
     layer.setAttributeNS(
       "http://www.inkscape.org/namespaces/inkscape",
       "inkscape:label",
-      layerId
+      layerId.toString()
     );
 
     for (const line of lines) {
@@ -192,7 +214,7 @@ function renderLines(svg, lines, optimize = false) {
         "polyline"
       );
       const points = vertices
-        .map((vertex) =>
+        .map((vertex: Vec2) =>
           optimize
             ? `${vertex.x.toFixed(3)},${vertex.y.toFixed(3)}`
             : `${vertex.x},${vertex.y}`
@@ -220,8 +242,8 @@ function renderLines(svg, lines, optimize = false) {
   svg.replaceChildren(...layers);
 }
 
-export default function riley(listeners, options) {
-  const { draw, update } = listeners;
+export default function riley(listeners: Listeners, options: Config) {
+  const { setup, draw, update } = listeners;
   if (!draw) {
     throw new Error("Must have a draw listener");
   }
@@ -236,11 +258,11 @@ export default function riley(listeners, options) {
 
   const svg = createSvg(paperSize, config.backgroundColor);
 
-  if (listeners.setup) {
-    listeners.setup(config);
+  if (setup) {
+    setup(config);
   }
 
-  if (listeners.update && config.autoplay) {
+  if (update && config.autoplay) {
     play(draw, update, svg, config);
   } else {
     requestAnimationFrame(() => render(svg, draw, config));

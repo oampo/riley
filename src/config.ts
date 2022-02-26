@@ -1,10 +1,41 @@
 import { customAlphabet } from "nanoid";
 
-import { vec4 } from "./math";
+import { vec2, vec4, Vec2, Vec4 } from "./math";
 
 const nanoid = customAlphabet("0123456789abcdef", 32);
 
-export default {
+export type PaperSize =
+  | "A1"
+  | "A2"
+  | "A3"
+  | "A4"
+  | "A5"
+  | "A6"
+  | "A7"
+  | "A8"
+  | "A9"
+  | "A10"
+  | Vec2;
+
+export type PaperOrientation = "portrait" | "landscape";
+
+export interface Config {
+  autoplay: boolean;
+  paperSize: PaperSize;
+  paperOrientation: PaperOrientation;
+  defaultColor: Vec4;
+  defaultWeight: number;
+  mergeThreshold: number;
+  backgroundColor: Vec4;
+  timestep: number;
+  defaultResolution: number;
+  epsilon: number;
+  absoluteComparisonThreshold: number;
+  seed: number | string;
+  size: Vec2;
+}
+
+const defaultConfig: Config = {
   autoplay: true,
   paperSize: "A3",
   paperOrientation: "portrait",
@@ -17,5 +48,7 @@ export default {
   epsilon: Number.EPSILON * 128,
   absoluteComparisonThreshold: Number.MIN_VALUE,
   seed: nanoid(),
-  size: undefined,
+  size: vec2(0, 0),
 };
+
+export default defaultConfig;

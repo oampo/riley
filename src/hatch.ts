@@ -1,8 +1,8 @@
 import config from "./config";
 import { boundingBox } from "./geometry";
-import Line from "./line";
+import type { Line } from "./line";
 import { Vec2, vec2 } from "./math";
-import { line } from "./shape";
+import line from "./line";
 import { SpatialHash } from "./spatial-hash";
 import { rotate, translate } from "./transform";
 import { clip } from "./clip-mask";
@@ -12,30 +12,30 @@ type HatchSpacing =
   | Array<number>
   | ((i: number, x: number, squareSize: number) => number);
 
-function getSpacingFn(spacing: HatchSpacing) {
+type SpacingFn = (i: number, width: number, squareSize: number) => number;
+
+function getSpacingFn(spacing: HatchSpacing): SpacingFn {
   if (typeof spacing === "number") {
     return () => spacing;
-  }
-
-  if (Array.isArray(spacing)) {
-    return (i) => spacing[i % spacing.length];
-  }
-
-  if (typeof spacing === "function") {
+  } else if (Array.isArray(spacing)) {
+    return (i: number) => spacing[i % spacing.length];
+  } else if (typeof spacing === "function") {
     return spacing;
+  } else {
+    throw new Error("Unknown spacing type");
   }
 }
 
 interface HatchOptions {
   angle?: number;
   spacing?: HatchSpacing;
-  render?: (start: Vec2, end: Vec2) => Line | Array<Line>;
+  render?: (start: Vec2, end: Vec2) => Line;
   alternate?: boolean;
-  polygonHash?: SpatialHash;
+  polygonHash?: SpatialHash<number>;
 }
 
 export function hatch(
-  polygon,
+  polygon: Line,
   {
     angle = 0,
     spacing = config.defaultWeight * 2,

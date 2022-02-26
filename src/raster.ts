@@ -1,9 +1,16 @@
-import { vec2 } from "./math";
+import { vec2, Vec2 } from "./math";
+
+export type RasterMethod = "amanatidesWoo" | "bresenham";
+
+interface RasterOptions {
+  gridSize?: Vec2;
+  method?: RasterMethod;
+}
 
 export function rasterSegment(
-  start,
-  end,
-  { gridSize = vec2(1, 1), method = "amanatidesWoo" } = {}
+  start: Vec2,
+  end: Vec2,
+  { gridSize = vec2(1, 1), method = "amanatidesWoo" }: RasterOptions = {}
 ) {
   if (method === "amanatidesWoo") {
     return rasterSegmentAmanatidesWoo(start, end, { gridSize });
@@ -15,9 +22,9 @@ export function rasterSegment(
 }
 
 function rasterSegmentAmanatidesWoo(
-  start,
-  end,
-  { gridSize = vec2(1, 1) } = {}
+  start: Vec2,
+  end: Vec2,
+  { gridSize = vec2(1, 1) }: Omit<RasterOptions, "method"> = {}
 ) {
   start = start.div(gridSize);
   end = end.div(gridSize);
@@ -47,7 +54,11 @@ function rasterSegmentAmanatidesWoo(
   return cells;
 }
 
-function rasterSegmentBresenham(start, end, { gridSize = vec2(1, 1) } = {}) {
+function rasterSegmentBresenham(
+  start: Vec2,
+  end: Vec2,
+  { gridSize = vec2(1, 1) }: Omit<RasterOptions, "method"> = {}
+) {
   start = start.div(gridSize).floor();
   end = end.div(gridSize).floor();
 

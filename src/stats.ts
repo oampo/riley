@@ -1,4 +1,6 @@
-export function length(...lines) {
+import type { Line } from "./line";
+
+export function length(...lines: Line[]): number {
   let length = 0;
   for (const { vertices } of lines) {
     for (let i = 0; i < vertices.length - 1; i++) {
@@ -8,7 +10,7 @@ export function length(...lines) {
   return length;
 }
 
-export function penDistance(...lines) {
+export function penDistance(...lines: Line[]): number {
   let distance = length(...lines);
   lines = lines.filter(({ vertices }) => vertices.length);
   for (let i = 0; i < lines.length - 1; i++) {

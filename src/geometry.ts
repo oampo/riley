@@ -1,8 +1,10 @@
-import { vec2 } from "./math";
-import { line } from "./shape";
+import type { Line } from "./line";
+
+import { vec2, Vec2 } from "./math";
+import line from "./line";
 import { spatialHashRastered, SpatialHash } from "./spatial-hash";
 
-export function boundingBox(line) {
+export function boundingBox(line: Line) {
   if (!line.vertices.length) {
     return {
       topLeft: vec2(),
@@ -26,7 +28,12 @@ export function boundingBox(line) {
   return { topLeft, bottomRight, size, center };
 }
 
-export function segmentIntersectsSegment(startA, endA, startB, endB) {
+export function segmentIntersectsSegment(
+  startA: Vec2,
+  endA: Vec2,
+  startB: Vec2,
+  endB: Vec2
+): Vec2 | null {
   const diffA = endA.sub(startA);
   const diffB = endB.sub(startB);
 
@@ -45,7 +52,16 @@ export function segmentIntersectsSegment(startA, endA, startB, endB) {
   return null;
 }
 
-function lineIntersectsLineBruteForce(lineA, lineB) {
+interface Intersection {
+  vertex: Vec2;
+  segmentIndexA: number;
+  segmentIndexB: number;
+}
+
+function lineIntersectsLineBruteForce(
+  lineA: Line,
+  lineB: Line
+): Intersection[] {
   const { vertices: verticesA } = lineA;
   const { vertices: verticesB } = lineB;
   const intersections = [];
@@ -73,11 +89,11 @@ function lineIntersectsLineBruteForce(lineA, lineB) {
 }
 
 function lineIntersectsLineHashed(
-  lineA,
-  lineB,
-  hashA: SpatialHash,
-  hashB: SpatialHash
-) {
+  lineA: Line,
+  lineB: Line,
+  hashA: SpatialHash<number>,
+  hashB: SpatialHash<number>
+): Intersection[] {
   const { vertices: verticesA } = lineA;
   const { vertices: verticesB } = lineB;
   const intersections = [];
@@ -87,12 +103,12 @@ function lineIntersectsLineHashed(
   // one cell
   const checked = new Set();
 
-  for (const [hash, segmentIndicesA] of Object.entries(hashA)) {
+  for (const [hash, segmentIndicesA] of hashA.entries()) {
     if (!(hash in hashB)) {
       continue;
     }
 
-    const segmentIndicesB = hashB[hash];
+    const segmentIndicesB = hashB.getByHash(hash);
 
     for (let i = 0; i < segmentIndicesA.length; i++) {
       const segmentIndexA = segmentIndicesA[i];
@@ -133,25 +149,25 @@ function lineIntersectsLineHashed(
 
 interface LineIntersectsLineOptions {
   sort?: boolean;
-  hashA?: SpatialHash;
-  hashB?: SpatialHash;
+  hashA?: SpatialHash<number>;
+  hashB?: SpatialHash<number>;
 }
 
 export function lineIntersectsLine(
-  lineA,
-  lineB,
+  lineA: Line,
+  lineB: Line,
   { sort = false, hashA, hashB }: LineIntersectsLineOptions = {}
 ) {
   const { vertices: verticesA } = lineA;
 
   let intersections;
-  if (hashA || hashB) {
-    if (!hashA) {
-      hashA = spatialHashRastered(lineA, { gridSize: hashB.gridSize });
-    }
-    if (!hashB) {
-      hashB = spatialHashRastered(lineB, { gridSize: hashA.gridSize });
-    }
+  if (hashA && !hashB) {
+    hashB = spatialHashRastered(lineB, { gridSize: hashA.gridSize });
+  } else if (!hashA && hashB) {
+    hashA = spatialHashRastered(lineA, { gridSize: hashB.gridSize });
+  }
+
+  if (hashA && hashB) {
     intersections = lineIntersectsLineHashed(lineA, lineB, hashA, hashB);
   } else {
     intersections = lineIntersectsLineBruteForce(lineA, lineB);
@@ -171,7 +187,11 @@ export function lineIntersectsLine(
   return intersections;
 }
 
-export function polygonContainsPoint(polygon, point, { polygonHash }) {
+export function polygonContainsPoint(
+  polygon: Line,
+  point: Vec2,
+  { polygonHash }: { polygonHash?: SpatialHash<number> }
+) {
   const { topLeft } = boundingBox(polygon);
 
   // Create a line from outside the polygon to the point
@@ -183,7 +203,7 @@ export function polygonContainsPoint(polygon, point, { polygonHash }) {
   return intersections.length % 2 === 1;
 }
 
-export function aabbContainsPoint(center, size, point) {
+export function aabbContainsPoint(center: Vec2, size: Vec2, point: Vec2) {
   return (
     point.x >= center.x - size.x / 2 &&
     point.x <= center.x + size.x / 2 &&

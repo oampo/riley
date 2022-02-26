@@ -1,11 +1,13 @@
-export function clone(line) {
+import type { Line } from "./line";
+
+export function clone(line: Line): Line {
   return {
-    vertices: [...line.vertices],
     ...line,
+    vertices: [...line.vertices],
   };
 }
 
-export function subdivide(line, maxDistance) {
+export function subdivide(line: Line, maxDistance: number): Line {
   const newVertices = [];
   for (let i = 0; i < line.vertices.length - 1; i++) {
     const vertexA = line.vertices[i];

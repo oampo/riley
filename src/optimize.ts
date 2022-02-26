@@ -2,6 +2,7 @@ import RBush from "rbush";
 import knn from "rbush-knn";
 
 import config from "./config";
+import type { Line } from "./line";
 
 interface RTreeNode {
   minX: number;
@@ -13,7 +14,7 @@ interface RTreeNode {
   partner?: RTreeNode;
 }
 
-export function spatialSort(lines) {
+export function spatialSort(lines: Line[]): Line[] {
   if (lines.length <= 1) {
     return lines;
   }
@@ -82,10 +83,14 @@ export function spatialSort(lines) {
   return new_lines;
 }
 
+interface MergeOptions {
+  mergeThreshold?: number;
+}
+
 export function mergeNearby(
-  lines,
-  { mergeThreshold = config.mergeThreshold } = {}
-) {
+  lines: Line[],
+  { mergeThreshold = config.mergeThreshold }: MergeOptions = {}
+): Line[] {
   const thresholdSquared = mergeThreshold ** 2;
 
   lines = lines.filter(({ vertices }) => vertices.length);

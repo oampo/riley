@@ -1,13 +1,18 @@
-import { line } from "./shape";
+import type { Line } from "./line";
+import line from "./line";
 import { lineIntersectsLine, polygonContainsPoint } from "./geometry";
 import { SpatialHash } from "./spatial-hash";
 
 interface ClipOptions {
-  lineHash?: SpatialHash;
-  polygonHash?: SpatialHash;
+  lineHash?: SpatialHash<number>;
+  polygonHash?: SpatialHash<number>;
 }
 
-export function clip(l, polygon, { lineHash, polygonHash }: ClipOptions = {}) {
+export function clip(
+  l: Line,
+  polygon: Line,
+  { lineHash, polygonHash }: ClipOptions = {}
+): Line[] {
   if (!l.vertices.length) {
     return [l];
   }
@@ -62,11 +67,15 @@ export function clip(l, polygon, { lineHash, polygonHash }: ClipOptions = {}) {
 }
 
 interface MaskOptions {
-  lineHash?: SpatialHash;
-  polygonHash?: SpatialHash;
+  lineHash?: SpatialHash<number>;
+  polygonHash?: SpatialHash<number>;
 }
 
-export function mask(l, polygon, { lineHash, polygonHash }: MaskOptions = {}) {
+export function mask(
+  l: Line,
+  polygon: Line,
+  { lineHash, polygonHash }: MaskOptions = {}
+): Line[] {
   if (!l.vertices.length || !polygon.vertices.length) {
     return [l];
   }

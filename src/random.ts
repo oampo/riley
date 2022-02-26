@@ -1,23 +1,32 @@
 import seedrandom from "seedrandom";
 
-let rng;
-
-export function randomSeed(seed) {
-  rng = new seedrandom(seed);
+interface prng {
+  (): number;
+  double(): number;
+  int32(): number;
+  quick(): number;
+  state: seedrandom.State;
 }
 
-export function random(low = 0, high = 1) {
+let rng: prng;
+
+export function randomSeed(seed: number | string) {
+  const seedString = typeof seed === "number" ? seed.toString() : seed;
+  rng = seedrandom(seedString);
+}
+
+export function random(low = 0, high = 1): number {
   if (!rng) {
     throw new Error("RNG must be seeded before using random functions");
   }
   return low + rng() * (high - low);
 }
 
-export function randomInt(low = 0, high = 2) {
+export function randomInt(low = 0, high = 2): number {
   return Math.floor(random(low, high));
 }
 
-export function gaussian(mean = 0, variance = 1) {
+export function gaussian(mean = 0, variance = 1): number {
   const r1 = random();
   const r2 = random();
 

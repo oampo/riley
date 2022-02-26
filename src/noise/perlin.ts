@@ -1,3 +1,5 @@
+import type { FirstOrderInterpolationFn } from "../math";
+
 import { smootherstep } from "../math";
 import { random } from "../random";
 import Vec2 from "../vec2";
@@ -11,9 +13,16 @@ import perlin4d from "./perlin4d";
 export const PERLIN_TABLE_SIZE = 512;
 export const PERLIN_TABLE_HALF_SIZE = PERLIN_TABLE_SIZE / 2;
 
-export let perlinTable;
+interface PerlinOptions {
+  octaves?: number;
+  decay?: number;
+  lacunarity?: number;
+  interpolate?: FirstOrderInterpolationFn;
+}
 
-export function perlinSeed() {
+export let perlinTable: number[];
+
+export function perlinSeed(): void {
   perlinTable = new Array(PERLIN_TABLE_SIZE);
   const PERLIN_TABLE_HALF_SIZE = PERLIN_TABLE_SIZE / 2;
   // Fill the table with the values 0-i
@@ -34,8 +43,11 @@ export function perlinSeed() {
   }
 }
 
-export default function perlin(value, options = {}) {
-  options = {
+export default function perlin(
+  value: number | Vec2 | Vec3 | Vec4,
+  options: PerlinOptions = {}
+) {
+  const optionsWithDefaults: Required<PerlinOptions> = {
     octaves: 4,
     decay: 0.5,
     lacunarity: 2,
@@ -43,13 +55,13 @@ export default function perlin(value, options = {}) {
     ...options,
   };
   if (typeof value === "number") {
-    return perlin1d(value, options);
+    return perlin1d(value, optionsWithDefaults);
   } else if (value instanceof Vec2) {
-    return perlin2d(value, options);
+    return perlin2d(value, optionsWithDefaults);
   } else if (value instanceof Vec3) {
-    return perlin3d(value, options);
+    return perlin3d(value, optionsWithDefaults);
   } else if (value instanceof Vec4) {
-    return perlin4d(value, options);
+    return perlin4d(value, optionsWithDefaults);
   }
 
   throw new Error(`Could not get perlin noise for value: ${value}`);
