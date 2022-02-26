@@ -39,8 +39,8 @@
     "rbush-knn": "^3.0.1",
     "sanitize-filename": "^1.6.3",
     "seedrandom": "^3.0.5",
-    "webpack": "^5.51.1",
-    "webpack-dev-server": "^4.0.0",
+    "webpack": "^5.68.0",
+    "webpack-dev-server": "^4.7.4",
     "yargs": "^17.1.1"
   }
 }

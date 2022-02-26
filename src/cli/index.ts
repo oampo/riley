@@ -12,7 +12,7 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import pkgDir from "pkg-dir";
 import sanitizeFilename from "sanitize-filename";
 import webpack from "webpack";
-import WebpackDevServer from "webpack-dev-server/lib/Server.js";
+import WebpackDevServer from "webpack-dev-server";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
@@ -215,7 +215,9 @@ async function startDevServer(dir) {
     {
       port: 3000,
       static: false,
-      onBeforeSetupMiddleware: ({ app }) => {
+      setupMiddlewares: (middlewares, devServer) => {
+        const { app } = devServer;
+        if (!app) throw new Error("No dev server app instance");
         app.use(express.json());
         app.post("/api/export", async function (req, res) {
           const { sketch, seed, frameCount, content } = req.body;
@@ -230,6 +232,7 @@ async function startDevServer(dir) {
           await fs.writeFile(path.join(exportDir, fileName), content);
           res.status(201).json({});
         });
+        return middlewares;
       },
     },
     compiler
