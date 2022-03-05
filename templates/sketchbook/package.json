@@ -14,7 +14,7 @@
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "riley": "file:/home/joe/code/js/riley"
+    "riley": "file:/~/code/js/riley"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
