@@ -4,19 +4,12 @@ import { execSync } from "child_process";
 import fs from "fs-extra";
 import path from "path";
 import { fileURLToPath } from "url";
-import { promisify } from "util";
 
-import express from "express";
-import globCb from "glob";
-import HtmlWebpackPlugin from "html-webpack-plugin";
 import pkgDir from "pkg-dir";
-import sanitizeFilename from "sanitize-filename";
-import webpack from "webpack";
-import WebpackDevServer from "webpack-dev-server";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
-const glob = promisify(globCb);
+import startDevServer from "./dev-server.js";
 
 function parseArgs() {
   const args = yargs(hideBin(process.argv))
@@ -144,112 +137,6 @@ async function createSketch(dir: string, name: string): Promise<void> {
   await copyTemplate(templateDir, sketchDir);
 }
 
-function isSubpath(dirA: string, dirB: string): boolean {
-  const relative = path.relative(dirA, dirB);
-  return relative
-    ? !relative.startsWith("..") && !path.isAbsolute(relative)
-    : false;
-}
-
-async function startDevServer(dir: string): Promise<void> {
-  const sketches = await glob(path.join(dir, "**", "src", "index.js"));
-
-  const entry = sketches.reduce(
-    (entry: { [name: string]: string }, sketch: string) => {
-      const sketchSegments = path.relative(dir, sketch).split(path.sep);
-      const sketchName = sketchSegments
-        // Slice off src/index.js
-        .slice(0, sketchSegments.length - 2)
-        .join("/");
-      return {
-        ...entry,
-        [sketchName]: `./${sketch}`,
-      };
-    },
-    {}
-  );
-
-  const template = path.join(
-    path.dirname(fileURLToPath(import.meta.url)),
-    "..",
-    "views",
-    "sketch.html"
-  );
-
-  const htmlPlugins = Object.keys(entry).map(
-    (entry) =>
-      new HtmlWebpackPlugin({
-        title: `Riley sketchbook | ${entry}`,
-        chunks: [entry],
-        filename: `${entry}/index.html`,
-        template,
-        inject: false,
-        scriptLoading: "blocking",
-      })
-  );
-
-  const compiler = webpack({
-    mode: "development",
-    entry,
-    output: {
-      path: path.resolve("build"),
-      filename: "[name]/index.js",
-      library: "sketch",
-    },
-    module: {
-      rules: [
-        {
-          test: /\.m?js/,
-          resolve: {
-            fullySpecified: false,
-          },
-        },
-      ],
-    },
-    stats: "errors-warnings",
-    plugins: [
-      ...htmlPlugins,
-      // Work around stupid webpack issue:
-      // https://github.com/webpack/webpack/issues/5756
-      // Make rbush-knn import the compiled version of tinyqueue
-      new webpack.NormalModuleReplacementPlugin(/tinyqueue/, (resource) => {
-        if (!/rbush-knn/.test(resource.context)) {
-          return;
-        }
-
-        resource.request = "tinyqueue/tinyqueue.js";
-      }),
-    ],
-  });
-  const server = new WebpackDevServer(
-    {
-      port: 3000,
-      static: false,
-      setupMiddlewares: (middlewares, devServer) => {
-        const { app } = devServer;
-        if (!app) throw new Error("No dev server app instance");
-        app.use(express.json());
-        app.post("/api/export", async function (req, res) {
-          const { sketch, seed, frameCount, content } = req.body;
-          const exportDir = path.join(dir, sketch, "export");
-          if (!isSubpath(dir, exportDir)) {
-            return res.status(400).json({
-              message: "Export directory must be subpath of sketch directory",
-            });
-          }
-          const fileName = sanitizeFilename(`frame.${seed}.${frameCount}.svg`);
-          await fs.ensureDir(exportDir);
-          await fs.writeFile(path.join(exportDir, fileName), content);
-          res.status(201).json({});
-        });
-        return middlewares;
-      },
-    },
-    compiler
-  );
-  server.start();
-}
-
 async function main(): Promise<void> {
   try {
     const args = await parseArgs();
@@ -270,7 +157,7 @@ async function main(): Promise<void> {
         break;
       }
       case "start":
-        startDevServer(args.directory);
+        await startDevServer(args.directory);
         break;
     }
   } catch (e) {

@@ -2,8 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title><%= htmlWebpackPlugin.options.title %></title>
-    <%= htmlWebpackPlugin.tags.headTags %>
+    <title>Riley sketch</title>
     <style>
       * {
         box-sizing: border-box;
@@ -32,13 +31,21 @@
         height: 100%;
         box-shadow: 0px 0px 10px #cccccc;
       }
+
+      .error-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        min-height: 100vh;
+      }
     </style>
   </head>
   <body>
     <div class="vertical-center">
       <main id="root"></main>
     </div>
-    <%= htmlWebpackPlugin.tags.bodyTags %>
+    <script src="{{ INDEX_JS }}"></script>
     <script>
       const svg = sketch.default.getElement();
       const container = document.getElementById("root");
@@ -46,6 +53,15 @@
       const height = svg.getAttribute("data-height");
       container.style.aspectRatio = `${width} / ${height}`;
       container.appendChild(svg);
+    </script>
+    <script>
+      const eventSource = new EventSource("{{ EVENT_URL }}");
+      eventSource.addEventListener("message", (event) => {
+        const payload = JSON.parse(event.data);
+        if (payload.reload) {
+          window.location.reload();
+        }
+      });
     </script>
   </body>
 </html>
