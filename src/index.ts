@@ -16,6 +16,7 @@ export * from "./clip-mask";
 export * from "./color";
 export * from "./geometry";
 export * from "./hatch";
+export * from "./line";
 export * from "./line-ops";
 export * from "./margin";
 export * from "./math";

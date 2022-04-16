@@ -2,7 +2,7 @@ import config from "./config";
 import { boundingBox } from "./geometry";
 import type { Line } from "./line";
 import { Vec2, vec2 } from "./math";
-import line from "./line";
+import { line } from "./line";
 import { SpatialHash } from "./spatial-hash";
 import { rotate, translate } from "./transform";
 import { clip } from "./clip-mask";

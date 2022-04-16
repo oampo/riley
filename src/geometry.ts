@@ -1,7 +1,7 @@
 import type { Line } from "./line";
 
 import { vec2, Vec2 } from "./math";
-import line from "./line";
+import { line } from "./line";
 import { spatialHashRastered, SpatialHash } from "./spatial-hash";
 
 export function boundingBox(line: Line) {

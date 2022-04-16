@@ -1,6 +1,6 @@
 import config from "./config";
 import { vec2, Vec2 } from "./math";
-import line from "./line";
+import { line } from "./line";
 import type { Line } from "./line";
 
 export function rect(center: Vec2, size: Vec2): Line {

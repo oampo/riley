@@ -1,5 +1,5 @@
 import type { Line } from "./line";
-import line from "./line";
+import { line } from "./line";
 import { lineIntersectsLine, polygonContainsPoint } from "./geometry";
 import { SpatialHash } from "./spatial-hash";
 

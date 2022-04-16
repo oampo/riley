@@ -9,7 +9,7 @@ export interface Line {
   layer: number;
 }
 
-export default function line(...vertices: Vec2[]): Line {
+export function line(...vertices: Vec2[]): Line {
   return {
     vertices,
     color: config.defaultColor,
