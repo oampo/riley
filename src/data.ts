@@ -1,4 +1,4 @@
-import Vec4 from "./vec4";
+import { Vec4 } from "./math";
 
 export function hex(x: Vec4): string {
   if (!(x instanceof Vec4)) {

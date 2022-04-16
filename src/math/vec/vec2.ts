@@ -1,6 +1,4 @@
-import Vec3 from "./vec3";
-import Mat3 from "./mat3";
-import { floatEq } from "./math";
+import { floatEq, Mat3, Vec3 } from "..";
 
 class Vec2 {
   x: number;
@@ -173,4 +171,8 @@ Vec2.prototype.sqrLen = Vec2.prototype.squaredLength;
 Vec2.prototype.dist = Vec2.prototype.distance;
 Vec2.prototype.sqrDist = Vec2.prototype.squaredDistance;
 
-export default Vec2;
+export { Vec2 };
+
+export function vec2(x = 0, y = 0) {
+  return new Vec2(x, y);
+}

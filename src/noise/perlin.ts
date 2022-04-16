@@ -2,9 +2,7 @@ import type { FirstOrderInterpolationFn } from "../math";
 
 import { smootherstep } from "../math";
 import { random } from "../random";
-import Vec2 from "../vec2";
-import Vec3 from "../vec3";
-import Vec4 from "../vec4";
+import { Vec2, Vec3, Vec4 } from "../math";
 import perlin1d from "./perlin1d";
 import perlin2d from "./perlin2d";
 import perlin3d from "./perlin3d";

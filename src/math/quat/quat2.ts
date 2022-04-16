@@ -1,4 +1,4 @@
-export default class Quat2 {
+export class Quat2 {
   rx: number;
   ry: number;
   rz: number;
@@ -31,4 +31,17 @@ export default class Quat2 {
       this.dw
     );
   }
+}
+
+export function quat2(
+  rx = 0,
+  ry = 0,
+  rz = 0,
+  rw = 0,
+  dx = 0,
+  dy = 0,
+  dz = 0,
+  dw = 1
+): Quat2 {
+  return new Quat2(rx, ry, rz, rw, dx, dy, dz, dw);
 }

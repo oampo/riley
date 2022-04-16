@@ -1,7 +1,5 @@
 import type { Line } from "./line";
-import { vec2 } from "./math";
-import Vec2 from "./vec2";
-import Mat3 from "./mat3";
+import { vec2, Vec2, Mat3 } from "./math";
 
 export function translate(line: Line, translation: Vec2): Line {
   line.vertices = line.vertices.map((v) => v.add(translation));

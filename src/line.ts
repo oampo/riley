@@ -1,6 +1,5 @@
 import config from "./config";
-import Vec2 from "./vec2";
-import Vec4 from "./vec4";
+import { Vec2, Vec4 } from "./math";
 
 export interface Line {
   vertices: Vec2[];

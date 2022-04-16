@@ -1,4 +1,4 @@
-export default class Mat2d {
+export class Mat2d {
   m00: number;
   m01: number;
   m10: number;
@@ -25,4 +25,8 @@ export default class Mat2d {
       this.m21
     );
   }
+}
+
+export function mat2d(m00 = 1, m01 = 0, m10 = 0, m11 = 1, m20 = 0, m21 = 0) {
+  return new Mat2d(m00, m01, m10, m11, m20, m21);
 }

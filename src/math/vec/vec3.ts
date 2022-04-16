@@ -1,4 +1,4 @@
-import { floatEq } from "./math";
+import { floatEq } from "..";
 
 class Vec3 {
   x: number;
@@ -173,4 +173,8 @@ Vec3.prototype.sqrLen = Vec3.prototype.squaredLength;
 Vec3.prototype.dist = Vec3.prototype.distance;
 Vec3.prototype.sqrDist = Vec3.prototype.squaredDistance;
 
-export default Vec3;
+export { Vec3 };
+
+export function vec3(x = 0, y = 0, z = 0) {
+  return new Vec3(x, y, z);
+}
