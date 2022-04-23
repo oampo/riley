@@ -1,7 +1,7 @@
 #! /usr/bin/env node
 
 import { execSync } from "child_process";
-import fs from "fs-extra";
+import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -83,14 +83,22 @@ async function getTemplateDir(templateName: string): Promise<string> {
 }
 
 async function copyTemplate(from: string, to: string): Promise<void> {
-  await fs.ensureDir(to);
+  try {
+    await fs.mkdir(to, { recursive: true });
+  } catch (err) {
+    throw new Error(`Could not create directory ${to}`);
+  }
   const files = await fs.readdir(to);
   if (files.length) {
     throw new Error(`Cannot copy to ${to}. Directory already contains files.`);
   }
 
-  await fs.copy(from, to, {
-    filter: (path) => path !== "node_modules" && path !== "package-lock.json",
+  await fs.cp(from, to, {
+    filter: (p) => {
+      const basename = path.basename(p);
+      return basename !== "node_modules" && basename !== "package-lock.json";
+    },
+    recursive: true,
   });
 }
 

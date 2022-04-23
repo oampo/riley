@@ -24,6 +24,7 @@
     "@types/express": "^4.17.13",
     "@types/fs-extra": "^9.0.13",
     "@types/glob": "^7.2.0",
+    "@types/node": "^16.11.27",
     "@types/rbush": "^3.0.0",
     "@types/seedrandom": "^3.0.1",
     "@types/yargs": "^17.0.8",
@@ -36,7 +37,6 @@
   },
   "dependencies": {
     "esbuild": "^0.14.25",
-    "fs-extra": "^10.0.0",
     "martinez-polygon-clipping": "^0.7.1",
     "rbush": "^3.0.1",
     "rbush-knn": "^3.0.1",
