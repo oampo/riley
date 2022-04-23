@@ -8,8 +8,10 @@ export function vertices(line: Line, vertices?: Vec2[]): Vec2[] | Line {
     return line.vertices;
   }
 
-  line.vertices = vertices;
-  return line;
+  return {
+    ...line,
+    vertices,
+  };
 }
 
 export function weight(line: Line): number;
@@ -19,8 +21,10 @@ export function weight(line: Line, weight?: number): number | Line {
     return line.weight;
   }
 
-  line.weight = weight;
-  return line;
+  return {
+    ...line,
+    weight,
+  };
 }
 
 export function layer(line: Line): number;
@@ -30,19 +34,25 @@ export function layer(line: Line, layer?: number): number | Line {
     return line.layer;
   }
 
-  line.layer = layer;
-  return line;
+  return {
+    ...line,
+    layer,
+  };
 }
 
 export function mapVertices(
   line: Line,
   fn: (vertex: Vec2, index: number, array: Vec2[]) => Vec2
 ): Line {
-  line.vertices = line.vertices.map(fn);
-  return line;
+  return {
+    ...line,
+    vertices: line.vertices.map(fn),
+  };
 }
 
 export function pushVertices(line: Line, ...vertices: Vec2[]): Line {
-  line.vertices.push(...vertices);
-  return line;
+  return {
+    ...line,
+    vertices: [...line.vertices, ...vertices],
+  };
 }

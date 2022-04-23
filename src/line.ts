@@ -2,10 +2,10 @@ import config from "./config";
 import { Vec2, Vec4 } from "./math";
 
 export interface Line {
-  vertices: Vec2[];
-  color: Vec4;
-  weight: number;
-  layer: number;
+  readonly vertices: Vec2[];
+  readonly color: Vec4;
+  readonly weight: number;
+  readonly layer: number;
 }
 
 export function line(...vertices: Vec2[]): Line {

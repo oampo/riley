@@ -8,8 +8,10 @@ export function color(line: Line, color?: Vec4): Vec4 | Line {
     return line.color;
   }
 
-  line.color = color;
-  return line;
+  return {
+    ...line,
+    color,
+  };
 }
 
 export function red(line: Line): number;
@@ -19,8 +21,13 @@ export function red(line: Line, value?: number): number | Line {
     return line.color.r;
   }
 
-  line.color.r = value;
-  return line;
+  const color = line.color.clone();
+  color.r = value;
+
+  return {
+    ...line,
+    color,
+  };
 }
 
 export function green(line: Line): number;
@@ -30,8 +37,13 @@ export function green(line: Line, value?: number): number | Line {
     return line.color.g;
   }
 
-  line.color.g = value;
-  return line;
+  const color = line.color.clone();
+  color.g = value;
+
+  return {
+    ...line,
+    color,
+  };
 }
 
 export function blue(line: Line): number;
@@ -41,8 +53,13 @@ export function blue(line: Line, value?: number) {
     return line.color.b;
   }
 
-  line.color.b = value;
-  return line;
+  const color = line.color.clone();
+  color.b = value;
+
+  return {
+    ...line,
+    color,
+  };
 }
 
 export function alpha(line: Line): number;
@@ -52,6 +69,11 @@ export function alpha(line: Line, value?: number) {
     return line.color.a;
   }
 
-  line.color.a = value;
-  return line;
+  const color = line.color.clone();
+  color.a = value;
+
+  return {
+    ...line,
+    color,
+  };
 }

@@ -4,6 +4,7 @@ export function clone(line: Line): Line {
   return {
     ...line,
     vertices: [...line.vertices],
+    color: line.color.clone(),
   };
 }
 
@@ -23,6 +24,8 @@ export function subdivide(line: Line, maxDistance: number): Line {
     }
     newVertices.push(vertexB.clone());
   }
-  line.vertices = newVertices;
-  return line;
+  return {
+    ...line,
+    vertices: newVertices,
+  };
 }
