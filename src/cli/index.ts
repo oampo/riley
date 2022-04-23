@@ -5,7 +5,6 @@ import fs from "fs-extra";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import pkgDir from "pkg-dir";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 
@@ -57,6 +56,24 @@ function parseArgs() {
     .help().argv;
 
   return Promise.resolve(args);
+}
+
+async function pkgDir(dir: string): Promise<string | undefined> {
+  dir = path.resolve(dir);
+  try {
+    const stat = await fs.lstat(path.join(dir, "package.json"));
+    if (stat.isFile()) return dir;
+  } catch (err) {
+    // Wasn't a file, so keep searching upwards
+  }
+
+  const parent = path.dirname(dir);
+  if (path.relative(parent, dir) === "") {
+    // It's the root directory, and we haven't found it
+    return undefined;
+  }
+
+  return pkgDir(parent);
 }
 
 async function getTemplateDir(templateName: string): Promise<string> {
