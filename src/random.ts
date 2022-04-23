@@ -1,25 +1,27 @@
-import seedrandom from "seedrandom";
+let seed: number | undefined;
 
-interface prng {
-  (): number;
-  double(): number;
-  int32(): number;
-  quick(): number;
-  state: seedrandom.State;
+function hash(s: string): number {
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    const char = s.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return hash;
 }
 
-let rng: prng;
-
-export function randomSeed(seed: number | string) {
-  const seedString = typeof seed === "number" ? seed.toString() : seed;
-  rng = seedrandom(seedString);
+export function randomSeed(s: number | string) {
+  seed = typeof s === "string" ? hash(s) : s;
 }
 
 export function random(low = 0, high = 1): number {
-  if (!rng) {
+  if (!seed) {
     throw new Error("RNG must be seeded before using random functions");
   }
-  return low + rng() * (high - low);
+  seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+  const random = seed / 0x7fffffff;
+
+  return low + random * (high - low);
 }
 
 export function randomInt(low = 0, high = 2): number {
