@@ -36,3 +36,11 @@ export function gaussian(mean = 0, variance = 1): number {
   const gaussian01 = Math.sqrt(-2 * Math.log(r1)) * Math.sin(2 * Math.PI * r2);
   return mean + variance * gaussian01;
 }
+
+export function randomId(length = 32, alphabet = "0123456789abcdef") {
+  let result = "";
+  for (let i = 0; i < length; i++) {
+    result = result + alphabet[Math.floor(Math.random() * alphabet.length)];
+  }
+  return result;
+}

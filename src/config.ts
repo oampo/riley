@@ -1,8 +1,5 @@
-import { customAlphabet } from "nanoid";
-
 import { vec2, vec4, Vec2, Vec4 } from "./math";
-
-const nanoid = customAlphabet("0123456789abcdef", 32);
+import { randomId } from "./random";
 
 export type PaperSize =
   | "A1"
@@ -47,7 +44,7 @@ const defaultConfig: Config = {
   defaultResolution: 2,
   epsilon: Number.EPSILON * 128,
   absoluteComparisonThreshold: Number.MIN_VALUE,
-  seed: nanoid(),
+  seed: randomId(),
   size: vec2(0, 0),
 };
 
