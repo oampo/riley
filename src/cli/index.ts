@@ -5,58 +5,79 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
-
+import { parseArgs } from "./arg-parser.js";
 import startDevServer from "./dev-server.js";
+import {
+  help,
+  startHelp,
+  createHelp,
+  createSketchbookHelp,
+  createSketchHelp,
+} from "./help.js";
+import { VERSION } from "../version.js";
 
-function parseArgs() {
-  const args = yargs(hideBin(process.argv))
-    .command("create", "Create a new sketchbook or sketch", (yargs) => {
-      return yargs
-        .command("sketchbook <path>", "Create a new sketchbook", (yargs) => {
-          return yargs
-            .positional("path", {
-              describe: "The path to create the sketchbook",
-              type: "string",
-            })
-            .demandOption("path");
-        })
-        .command(
-          "sketch <name> [-d <directory>]",
-          "Create a new sketch",
-          (yargs) => {
-            return yargs
-              .positional("name", {
-                describe: "The name of the sketch",
-                type: "string",
-              })
-              .option("directory", {
-                alias: "d",
-                describe: "The directory which should contain the sketch",
-                default: "./",
-              })
-              .demandOption("name");
-          }
-        )
-        .version(false)
-        .demandCommand();
-    })
-    .command("start", "Start developing a sketch", (yargs) => {
-      return yargs
-        .option("directory", {
-          alias: "d",
-          describe: "The directory which contains the sketch",
-          default: "./",
-        })
-        .version(false);
-    })
-    .demandCommand()
-    .strict()
-    .help().argv;
-
-  return Promise.resolve(args);
-}
+const argSpec = {
+  commands: [
+    {
+      name: "create",
+      spec: {
+        commands: [
+          {
+            name: "sketchbook",
+            spec: {
+              args: [
+                {
+                  name: "directory",
+                  type: "string",
+                  required: true,
+                },
+              ] as const,
+              help: createSketchbookHelp,
+            },
+          },
+          {
+            name: "sketch",
+            spec: {
+              args: [
+                {
+                  name: "name",
+                  type: "string",
+                  required: true,
+                },
+              ] as const,
+              flags: [
+                {
+                  name: "directory",
+                  alias: "d",
+                  type: "string",
+                  default: "./",
+                },
+              ] as const,
+              help: createSketchHelp,
+            },
+          },
+        ] as const,
+        help: createHelp,
+      },
+    },
+    {
+      name: "start",
+      spec: {
+        flags: [
+          {
+            name: "directory",
+            type: "string",
+            alias: "d",
+            default: "./",
+          },
+        ] as const,
+        help: startHelp,
+      },
+    },
+  ] as const,
+  help: help,
+  version: VERSION,
+};
 
 async function pkgDir(dir: string): Promise<string | undefined> {
   dir = path.resolve(dir);
@@ -164,26 +185,36 @@ async function createSketch(dir: string, name: string): Promise<void> {
 
 async function main(): Promise<void> {
   try {
-    const args = await parseArgs();
+    const { command } = parseArgs<typeof argSpec>(
+      process.argv.slice(2),
+      argSpec
+    );
 
-    const command = args._[0];
-
-    switch (command) {
+    switch (command.name) {
       case "create": {
-        const command = args._[1];
-        switch (command) {
-          case "sketchbook":
-            await createSketchbook(args.path);
+        const { command: subcommand } = command;
+
+        switch (subcommand.name) {
+          case "sketchbook": {
+            const { args } = subcommand;
+            const { directory } = args;
+            await createSketchbook(directory);
             break;
-          case "sketch":
-            await createSketch(args.directory, args.name);
+          }
+          case "sketch": {
+            const { name } = subcommand.args;
+            const { directory } = subcommand.flags;
+            await createSketch(directory, name);
             break;
+          }
         }
         break;
       }
-      case "start":
-        await startDevServer(args.directory);
+      case "start": {
+        const { flags } = command;
+        await startDevServer(flags.directory);
         break;
+      }
     }
   } catch (e) {
     if (e instanceof Error) {

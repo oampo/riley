@@ -6,6 +6,7 @@
   "main": "build/index.js",
   "scripts": {
     "start": "npm run build && node build/cli/index.js",
+    "prebuild": "echo \"export const VERSION = \\\"$npm_package_version\\\";\" > src/version.ts",
     "build": "tsc && cp -r src/views build/",
     "build:check": "tsc --noEmit",
     "prepublish": "npm run build",
@@ -39,7 +40,6 @@
     "esbuild": "^0.14.25",
     "martinez-polygon-clipping": "^0.7.1",
     "rbush": "^3.0.1",
-    "rbush-knn": "^3.0.1",
-    "yargs": "^17.1.1"
+    "rbush-knn": "^3.0.1"
   }
 }
