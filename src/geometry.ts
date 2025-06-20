@@ -28,40 +28,77 @@ export function boundingBox(line: Line) {
   return { topLeft, bottomRight, size, center };
 }
 
+export interface PointIntersection {
+  type: "point";
+  point: Vec2;
+}
+
+export interface SegmentIntersection {
+  type: "segment";
+  start: Vec2;
+  end: Vec2;
+}
+
+export type Intersection = PointIntersection | SegmentIntersection;
+
 export function segmentIntersectsSegment(
   startA: Vec2,
   endA: Vec2,
   startB: Vec2,
   endB: Vec2
-): Vec2 | null {
+): Intersection | null {
   const diffA = endA.sub(startA);
   const diffB = endB.sub(startB);
 
   const diffStarts = startB.sub(startA);
 
   const crossA = diffStarts.cross(diffA).z;
-  const crossB = diffStarts.cross(diffB).z;
   const crossAB = diffA.cross(diffB).z;
 
+
+  if (crossA === 0 && crossAB === 0) {
+    // Segments are collinear
+    // Lexographicaly sort the points
+    const points = [startA, endA, startB, endB];
+    points.sort((a, b) => (a.x === b.x ? a.y - b.y : a.x - b.x));
+    if (
+      (points[0] === startA && points[1] === endA) ||
+      (points[0] === endA && points[1] === startA) ||
+      (points[0] === startB && points[1] === endB) ||
+      (points[0] === endB && points[1] === startB)
+    ) {
+      return null;
+    }
+    return {
+      type: "segment",
+      start: points[1],
+      end: points[2],
+    };
+  }
+
+  const crossB = diffStarts.cross(diffB).z;
   const s = crossA / crossAB;
   const t = crossB / crossAB;
 
-  if (s > 0 && s < 1 && t > 0 && t < 1) {
-    return startA.add(diffA.scale(t));
+  if (s >= 0 && s <= 1 && t >= 0 && t <= 1) {
+    return {
+      type: "point",
+      point: startA.add(diffA.scale(t)),
+    };
   }
   return null;
 }
 
-interface Intersection {
-  vertex: Vec2;
+type LineIntersection = {
+  intersection: Intersection;
   segmentIndexA: number;
   segmentIndexB: number;
-}
+};
 
 function lineIntersectsLineBruteForce(
   lineA: Line,
   lineB: Line
-): Intersection[] {
+): LineIntersection[] {
   const { vertices: verticesA } = lineA;
   const { vertices: verticesB } = lineB;
   const intersections = [];
@@ -77,7 +114,7 @@ function lineIntersectsLineBruteForce(
       const intersection = segmentIntersectsSegment(startA, endA, startB, endB);
       if (intersection) {
         intersections.push({
-          vertex: intersection,
+          intersection,
           segmentIndexA: i,
           segmentIndexB: j,
         });
@@ -93,7 +130,7 @@ function lineIntersectsLineHashed(
   lineB: Line,
   hashA: SpatialHash<number>,
   hashB: SpatialHash<number>
-): Intersection[] {
+): LineIntersection[] {
   const { vertices: verticesA } = lineA;
   const { vertices: verticesB } = lineB;
   const intersections = [];
@@ -133,7 +170,7 @@ function lineIntersectsLineHashed(
         );
         if (intersection) {
           intersections.push({
-            vertex: intersection,
+            intersection,
             segmentIndexA,
             segmentIndexB,
           });
@@ -148,7 +185,6 @@ function lineIntersectsLineHashed(
 }
 
 interface LineIntersectsLineOptions {
-  sort?: boolean;
   hashA?: SpatialHash<number>;
   hashB?: SpatialHash<number>;
 }
@@ -156,11 +192,8 @@ interface LineIntersectsLineOptions {
 export function lineIntersectsLine(
   lineA: Line,
   lineB: Line,
-  { sort = false, hashA, hashB }: LineIntersectsLineOptions = {}
-) {
-  const { vertices: verticesA } = lineA;
-
-  let intersections;
+  { hashA, hashB }: LineIntersectsLineOptions = {}
+): LineIntersection[] {
   if (hashA && !hashB) {
     hashB = spatialHashRastered(lineB, { gridSize: hashA.gridSize });
   } else if (!hashA && hashB) {
@@ -168,23 +201,43 @@ export function lineIntersectsLine(
   }
 
   if (hashA && hashB) {
-    intersections = lineIntersectsLineHashed(lineA, lineB, hashA, hashB);
-  } else {
-    intersections = lineIntersectsLineBruteForce(lineA, lineB);
+    return lineIntersectsLineHashed(lineA, lineB, hashA, hashB);
   }
 
-  if (sort) {
-    intersections.sort((a, b) => {
-      if (a.segmentIndexA === b.segmentIndexA) {
-        const distA = a.vertex.sqrDist(verticesA[a.segmentIndexA]);
-        const distB = b.vertex.sqrDist(verticesA[a.segmentIndexA]);
-        return distA - distB;
+  return lineIntersectsLineBruteForce(lineA, lineB);
+}
+
+export function sortIntersections(
+  line: Line,
+  intersections: readonly LineIntersection[]
+): LineIntersection[] {
+  return [...intersections].sort((a, b) => {
+    if (a.segmentIndexA === b.segmentIndexA) {
+      const vertex = line.vertices[a.segmentIndexA];
+
+      let distA, distB;
+      if (a.intersection.type === "segment") {
+        distA = Math.min(
+          a.intersection.start.sqrDist(vertex),
+          a.intersection.end.sqrDist(vertex)
+        );
+      } else {
+        distA = a.intersection.point.sqrDist(vertex);
       }
-      return a.segmentIndexA - b.segmentIndexA;
-    });
-  }
 
-  return intersections;
+      if (b.intersection.type === "segment") {
+        distB = Math.min(
+          b.intersection.start.sqrDist(vertex),
+          b.intersection.end.sqrDist(vertex)
+        );
+      } else {
+        distB = b.intersection.point.sqrDist(vertex);
+      }
+
+      return distA - distB;
+    }
+    return a.segmentIndexA - b.segmentIndexA;
+  });
 }
 
 export function polygonContainsPoint(

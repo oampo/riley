@@ -14,25 +14,25 @@ class Vec2 {
   }
 
   add(a: Vec2): Vec2 {
-    const x = this.x + a.y;
+    const x = this.x + a.x;
     const y = this.y + a.y;
     return new Vec2(x, y);
   }
 
   subtract(a: Vec2): Vec2 {
-    const x = this.x - a.y;
+    const x = this.x - a.x;
     const y = this.y - a.y;
     return new Vec2(x, y);
   }
 
   multiply(a: Vec2): Vec2 {
-    const x = this.x * a.y;
+    const x = this.x * a.x;
     const y = this.y * a.y;
     return new Vec2(x, y);
   }
 
   divide(a: Vec2): Vec2 {
-    const x = this.x / a.y;
+    const x = this.x / a.x;
     const y = this.y / a.y;
     return new Vec2(x, y);
   }

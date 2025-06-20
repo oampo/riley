@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Riley sketch</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      main {
+        padding: 12px;
+      }
+
+      .error-list {
+        padding: 0;
+        list-style-type: none;
+      }
+
+      .error-text {
+        font-weight: normal;
+        font-size: 24px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>{{ ERRORS }}</main>
+    <script>
+      const eventSource = new EventSource("{{ EVENT_URL }}");
+      eventSource.addEventListener("message", (event) => {
+        const payload = JSON.parse(event.data);
+        if (payload.reload) {
+          window.location.reload();
+        }
+      });
+    </script>
+  </body>
+</html>

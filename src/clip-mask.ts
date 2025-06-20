@@ -1,6 +1,6 @@
 import type { Line } from "./line";
 import { line } from "./line";
-import { lineIntersectsLine, polygonContainsPoint } from "./geometry";
+import { lineIntersectsLine, polygonContainsPoint, sortIntersections } from "./geometry";
 import { SpatialHash } from "./spatial-hash";
 
 interface ClipOptions {
@@ -20,11 +20,12 @@ export function clip(
     return [line()];
   }
 
-  const intersections = lineIntersectsLine(l, polygon, {
-    sort: true,
+  let intersections = lineIntersectsLine(l, polygon, {
     hashA: lineHash,
     hashB: polygonHash,
   });
+  intersections = sortIntersections(l, intersections);
+
 
   if (!intersections.length) {
     if (polygonContainsPoint(polygon, l.vertices[0], { polygonHash })) {
@@ -80,11 +81,11 @@ export function mask(
     return [l];
   }
 
-  const intersections = lineIntersectsLine(l, polygon, {
-    sort: true,
+  let intersections = lineIntersectsLine(l, polygon, {
     hashA: lineHash,
     hashB: polygonHash,
   });
+  intersections = sortIntersections(l, intersections);
 
   if (!intersections.length) {
     if (polygonContainsPoint(polygon, l.vertices[0], { polygonHash })) {

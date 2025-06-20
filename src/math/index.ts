@@ -1,5 +1,3 @@
-import config from "../config";
-
 export * from "./vec/vec2";
 export * from "./vec/vec3";
 export * from "./vec/vec4";
@@ -9,6 +7,8 @@ export * from "./mat/mat3";
 export * from "./mat/mat4";
 export * from "./quat/quat";
 export * from "./quat/quat2";
+
+import config from "../config";
 
 export function remap(
   value: number,

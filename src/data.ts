@@ -1,10 +1,6 @@
 import { Vec4 } from "./math";
 
 export function hex(x: Vec4): string {
-  if (!(x instanceof Vec4)) {
-    throw new Error(`Could not convert value to hex: ${x}`);
-  }
-
   return (
     Math.floor(x.r * 255)
       .toString(16)
@@ -22,10 +18,6 @@ export function hex(x: Vec4): string {
 }
 
 export function rgbHex(x: Vec4): string {
-  if (!(x instanceof Vec4)) {
-    throw new Error(`Could not convert value to hex: ${x}`);
-  }
-
   return (
     Math.floor(x.r * 255)
       .toString(16)
