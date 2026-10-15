@@ -195,7 +195,7 @@ export function polygonContainsPoint(
   const l = line(start, point);
   const intersections = lineIntersectsLine(l, polygon, { hashB: polygonHash });
 
-  // If there are an even number of intersections, the point is inside the polygon
+  // If there are an odd number of intersections, the point is inside the polygon
   return intersections.length % 2 === 1;
 }
 
