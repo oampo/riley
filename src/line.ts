@@ -1,9 +1,10 @@
-import config from "./config";
-import { Vec2, Vec4 } from "./math";
+import type { RgbaColor } from "./color";
+import { getConfig } from "./config";
+import type { Vec2 } from "./math";
 
 export interface Line {
   readonly vertices: Vec2[];
-  readonly color: Vec4;
+  readonly color: RgbaColor;
   readonly weight: number;
   readonly layer: number;
 }
@@ -11,8 +12,8 @@ export interface Line {
 export function line(...vertices: Vec2[]): Line {
   return {
     vertices,
-    color: config.defaultColor,
-    weight: config.defaultWeight,
+    color: getConfig().defaultColor,
+    weight: getConfig().defaultWeight,
     layer: 0,
   };
 }

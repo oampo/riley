@@ -1,5 +1,6 @@
-import { lerp, remap, FirstOrderInterpolationFn } from "../math";
-import { perlinTable, PERLIN_TABLE_HALF_SIZE } from "./perlin";
+import type { FirstOrderInterpolationFn } from "../math";
+import { lerp, remap } from "../math";
+import { PERLIN_TABLE_HALF_SIZE, perlinTable } from "./perlin";
 import { sumOctaves } from "./util";
 
 const PERLIN_GRADIENTS_1D = [1, -1];
@@ -12,7 +13,7 @@ function perlinGradient1d(index: number): number {
 export default sumOctaves(
   (
     value: number,
-    { interpolate }: { interpolate: FirstOrderInterpolationFn }
+    { interpolate }: { interpolate: FirstOrderInterpolationFn },
   ) => {
     // Wrap negative values
     value = value < 0 ? Number.MAX_SAFE_INTEGER + value : value;
@@ -35,5 +36,5 @@ export default sumOctaves(
     const result = lerp(dot0, dot1, interpolate(0, 1, gridPoint));
 
     return remap(result, -1, 1, 0, 1);
-  }
+  },
 );

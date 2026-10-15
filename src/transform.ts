@@ -1,5 +1,6 @@
 import type { Line } from "./line";
-import { vec2, Vec2, Mat3 } from "./math";
+import type { Vec2 } from "./math";
+import { vec2 } from "./math";
 
 export function translate(line: Line, translation: Vec2): Line {
   return {
@@ -18,17 +19,10 @@ export function scale(line: Line, scale: Vec2): Line {
 export function rotate(
   line: Line,
   rotation: number,
-  { center = vec2() } = {}
+  { center = vec2() } = {},
 ): Line {
   return {
     ...line,
     vertices: line.vertices.map((v) => v.rotate(center, rotation)),
-  };
-}
-
-export function transform(line: Line, transform: Mat3): Line {
-  return {
-    ...line,
-    vertices: line.vertices.map((v) => v.transformMat3(transform)),
   };
 }

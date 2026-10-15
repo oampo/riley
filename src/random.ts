@@ -10,7 +10,7 @@ function hash(s: string): number {
   return hash;
 }
 
-export function randomSeed(s: number | string) {
+export function randomSeed(s: number | string): void {
   seed = typeof s === "string" ? hash(s) : s;
 }
 
@@ -37,7 +37,7 @@ export function gaussian(mean = 0, variance = 1): number {
   return mean + variance * gaussian01;
 }
 
-export function randomId(length = 32, alphabet = "0123456789abcdef") {
+export function randomId(length = 32, alphabet = "0123456789abcdef"): string {
   let result = "";
   for (let i = 0; i < length; i++) {
     result = result + alphabet[Math.floor(Math.random() * alphabet.length)];

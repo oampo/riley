@@ -1,7 +1,6 @@
 import type { FirstOrderInterpolationFn, Vec2 } from "../math";
-
 import { lerp, remap, vec2 } from "../math";
-import { perlinTable, PERLIN_TABLE_HALF_SIZE } from "./perlin";
+import { PERLIN_TABLE_HALF_SIZE, perlinTable } from "./perlin";
 import { sumOctaves } from "./util";
 
 const PERLIN_GRADIENTS_2D = [
@@ -25,17 +24,17 @@ function perlinGradient2d(index: Vec2): Vec2 {
 export default sumOctaves(
   (
     value: Vec2,
-    { interpolate }: { interpolate: FirstOrderInterpolationFn }
+    { interpolate }: { interpolate: FirstOrderInterpolationFn },
   ) => {
     // Wrap negative values
     value = vec2(
       value.x < 0 ? Number.MAX_SAFE_INTEGER + value.x : value.x,
-      value.y < 0 ? Number.MAX_SAFE_INTEGER + value.y : value.y
+      value.y < 0 ? Number.MAX_SAFE_INTEGER + value.y : value.y,
     );
     const gridIndex = value.floor();
     const gridPoint = value.sub(gridIndex);
     const modIndex = gridIndex.mod(
-      vec2(PERLIN_TABLE_HALF_SIZE, PERLIN_TABLE_HALF_SIZE)
+      vec2(PERLIN_TABLE_HALF_SIZE, PERLIN_TABLE_HALF_SIZE),
     );
 
     // Find the gradient at the corners
@@ -59,9 +58,9 @@ export default sumOctaves(
     const result = lerp(
       lerp(dot0, dot1, interpolate(0, 1, gridPoint.x)),
       lerp(dot2, dot3, interpolate(0, 1, gridPoint.x)),
-      interpolate(0, 1, gridPoint.y)
+      interpolate(0, 1, gridPoint.y),
     );
 
     return remap(result, -1, 1, 0, 1);
-  }
+  },
 );

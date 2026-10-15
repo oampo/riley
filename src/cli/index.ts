@@ -5,16 +5,16 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { VERSION } from "../version.js";
 import { parseArgs } from "./arg-parser.js";
 import startDevServer from "./dev-server.js";
 import {
-  help,
-  startHelp,
   createHelp,
   createSketchbookHelp,
   createSketchHelp,
+  help,
+  startHelp,
 } from "./help.js";
-import { VERSION } from "../version.js";
 
 const argSpec = {
   commands: [
@@ -84,7 +84,7 @@ async function pkgDir(dir: string): Promise<string | undefined> {
   try {
     const stat = await fs.lstat(path.join(dir, "package.json"));
     if (stat.isFile()) return dir;
-  } catch (err) {
+  } catch {
     // Wasn't a file, so keep searching upwards
   }
 
@@ -107,7 +107,7 @@ async function copyTemplate(from: string, to: string): Promise<void> {
   try {
     await fs.mkdir(to, { recursive: true });
   } catch (err) {
-    throw new Error(`Could not create directory ${to}`);
+    throw new Error(`Could not create directory ${to}`, { cause: err });
   }
   const files = await fs.readdir(to);
   if (files.length) {
@@ -135,7 +135,7 @@ function gitInit(dir: string): void {
   console.log("Initialising git repository");
   try {
     execSync(`git init ${dir}`, { stdio: "inherit" });
-  } catch (e) {
+  } catch {
     console.warn("Could not initialise git repository");
   }
 }
@@ -146,7 +146,7 @@ function gitCommit(dir: string): void {
   try {
     execSync(`git add -A`, { stdio: "inherit" });
     execSync(`git commit -m "Initial commit from Riley"`, { stdio: "inherit" });
-  } catch (e) {
+  } catch {
     console.warn("Could not create initial git commit");
   } finally {
     process.chdir(cwd);
@@ -156,7 +156,7 @@ function gitCommit(dir: string): void {
 async function setPackageName(dir: string): Promise<void> {
   const packageJsonPath = path.join(dir, "package.json");
   const data = await fs.readFile(packageJsonPath, "utf-8");
-  const packageJson = JSON.parse(data);
+  const packageJson = JSON.parse(data) as { name: string };
   const baseName = path.parse(dir).base;
   packageJson.name = baseName
     .toLowerCase()
@@ -164,7 +164,7 @@ async function setPackageName(dir: string): Promise<void> {
     .replace(/[^a-zA-Z0-9-]/g, "");
   await fs.writeFile(
     packageJsonPath,
-    JSON.stringify(packageJson, undefined, 2) + "\n"
+    JSON.stringify(packageJson, undefined, 2) + "\n",
   );
 }
 
@@ -187,7 +187,7 @@ async function main(): Promise<void> {
   try {
     const { command } = parseArgs<typeof argSpec>(
       process.argv.slice(2),
-      argSpec
+      argSpec,
     );
 
     switch (command.name) {
@@ -212,7 +212,7 @@ async function main(): Promise<void> {
       }
       case "start": {
         const { flags } = command;
-        await startDevServer(flags.directory);
+        startDevServer(flags.directory);
         break;
       }
     }
@@ -224,4 +224,4 @@ async function main(): Promise<void> {
   }
 }
 
-main();
+void main();

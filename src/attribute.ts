@@ -1,5 +1,5 @@
 import type { Line } from "./line";
-import { Vec2 } from "./math";
+import type { Vec2 } from "./math";
 
 export function vertices(line: Line): Vec2[];
 export function vertices(line: Line, vertices: Vec2[]): Line;
@@ -42,7 +42,7 @@ export function layer(line: Line, layer?: number): number | Line {
 
 export function mapVertices(
   line: Line,
-  fn: (vertex: Vec2, index: number, array: Vec2[]) => Vec2
+  fn: (vertex: Vec2, index: number, array: Vec2[]) => Vec2,
 ): Line {
   return {
     ...line,

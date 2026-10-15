@@ -7,12 +7,18 @@
   "scripts": {
     "start": "npm run build && node build/cli/index.js",
     "prebuild": "echo \"export const VERSION = \\\"$npm_package_version\\\";\" > src/version.ts",
-    "build": "tsc && cp -r src/views build/",
-    "build:check": "tsc --noEmit",
+    "build": "npm run build:cli && npm run build:lib && cp -r src/views build/ && chmod +x build/cli/index.js",
+    "build:check": "tsc -p tsconfig.lib.json --noEmit && tsc -p tsconfig.bin.json --noEmit",
+    "build:cli": "npm run build:cli:bundle",
+    "build:cli:bundle": "esbuild --bundle src/cli/index.ts --outdir=build/cli --platform=node --target=node24 --sourcemap --packages=external --format=esm",
+    "build:lib": "npm run build:lib:bundle && npm run build:lib:declarations",
+    "build:lib:bundle": "esbuild --bundle src/index.ts --outdir=build --sourcemap --format=esm",
+    "build:lib:declarations": "tsc -p tsconfig.lib.json --emitDeclarationOnly",
     "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
     "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint --fix .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
@@ -22,24 +28,20 @@
   "author": "Joe Turner <joe@oampo.co.uk>",
   "license": "MIT",
   "devDependencies": {
-    "@types/express": "^4.17.13",
-    "@types/fs-extra": "^9.0.13",
-    "@types/glob": "^7.2.0",
-    "@types/node": "^16.11.27",
-    "@types/rbush": "^3.0.0",
-    "@types/seedrandom": "^3.0.1",
-    "@types/yargs": "^17.0.8",
-    "@typescript-eslint/eslint-plugin": "^5.4.0",
-    "@typescript-eslint/parser": "^5.4.0",
-    "eslint": "^7.32.0",
-    "husky": "^7.0.1",
-    "prettier": "^2.3.2",
-    "typescript": "^4.5.2"
+    "@types/node": "^26.6.4",
+    "@types/rbush": "^4.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.71.1",
+    "@typescript-eslint/parser": "^8.71.1",
+    "eslint": "^8.57.1",
+    "eslint-plugin-simple-import-sort": "^14.0.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.9.9"
   },
   "dependencies": {
-    "esbuild": "^0.14.25",
-    "martinez-polygon-clipping": "^0.7.1",
-    "rbush": "^3.0.1",
-    "rbush-knn": "^3.0.1"
+    "typescript": "^6.0.3",
+    "esbuild": "^0.28.2",
+    "martinez-polygon-clipping": "^0.9.0",
+    "rbush": "^4.0.1",
+    "rbush-knn": "^4.0.0"
   }
 }

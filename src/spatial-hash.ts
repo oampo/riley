@@ -1,7 +1,9 @@
-import type { Line } from "./line";
-import { vec2, Vec2 } from "./math";
 import { vertices } from "./attribute";
-import { rasterSegment, RasterMethod } from "./raster";
+import type { Line } from "./line";
+import type { Vec2 } from "./math";
+import { vec2 } from "./math";
+import type { RasterMethod } from "./raster";
+import { rasterSegment } from "./raster";
 
 interface SpatialHashOptions {
   gridSize: Vec2;
@@ -21,7 +23,7 @@ export class SpatialHash<T> {
     this.entryMap = {};
   }
 
-  addPoint(v: Vec2, value: T) {
+  addPoint(v: Vec2, value: T): void {
     const hash = hashPoint(v, { gridSize: this.gridSize });
     if (!(hash in this.entryMap)) {
       this.entryMap[hash] = [value];
@@ -30,7 +32,7 @@ export class SpatialHash<T> {
     }
   }
 
-  entries() {
+  entries(): [string, T[]][] {
     return Object.entries(this.entryMap);
   }
 
@@ -42,8 +44,8 @@ export class SpatialHash<T> {
     start: Vec2,
     end: Vec2,
     value: T,
-    { method = "amanatidesWoo" }: { method?: RasterMethod } = {}
-  ) {
+    { method = "amanatidesWoo" }: { method?: RasterMethod } = {},
+  ): void {
     const cells = rasterSegment(start, end, {
       gridSize: this.gridSize,
       method,
@@ -59,7 +61,7 @@ export class SpatialHash<T> {
     }
   }
 
-  search(center: Vec2, size: Vec2) {
+  search(center: Vec2, size: Vec2): T[] {
     center = center.div(this.gridSize);
     size = size.div(this.gridSize);
     const topLeft = center.sub(size.scale(0.5)).floor();
@@ -79,14 +81,14 @@ export class SpatialHash<T> {
 }
 
 export function spatialHash<T>(
-  options: Partial<SpatialHashOptions>
+  options: Partial<SpatialHashOptions>,
 ): SpatialHash<T> {
   return new SpatialHash<T>(options);
 }
 
 export function spatialHashPoints(
   l: Line,
-  options: Partial<SpatialHashOptions>
+  options: Partial<SpatialHashOptions>,
 ): SpatialHash<number> {
   const vs = vertices(l);
   const sh: SpatialHash<number> = spatialHash(options);
@@ -98,7 +100,7 @@ export function spatialHashPoints(
 
 export function spatialHashRastered(
   l: Line,
-  options: Partial<SpatialHashOptions>
+  options: Partial<SpatialHashOptions>,
 ): SpatialHash<number> {
   const vs = vertices(l);
   const sh: SpatialHash<number> = spatialHash(options);

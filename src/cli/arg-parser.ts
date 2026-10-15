@@ -57,15 +57,15 @@ type Name<T> = T extends { name: infer N }
 type BooleanArgValue<T extends BooleanFlag> = T["required"] extends true
   ? boolean
   : T["default"] extends boolean
-  ? boolean
-  : boolean | null;
+    ? boolean
+    : boolean | null;
 
 type StringArgValue<T extends StringArgument | StringFlag> =
   T["required"] extends true
     ? string
     : T["default"] extends string
-    ? string
-    : string | null;
+      ? string
+      : string | null;
 
 type ParsedPositionalArgs<T extends readonly Argument[]> = {
   [Key in IndexKeys<T> as Name<T[Key]>]: T[Key] extends StringArgument
@@ -77,8 +77,8 @@ type ParsedFlagArgs<T extends readonly Flag[]> = {
   [Key in IndexKeys<T> as Name<T[Key]>]: T[Key] extends BooleanFlag
     ? BooleanArgValue<T[Key]>
     : T[Key] extends StringFlag
-    ? StringArgValue<T[Key]>
-    : never;
+      ? StringArgValue<T[Key]>
+      : never;
 };
 
 type ParsedCommandArgs<T extends readonly Command[]> = {
@@ -128,7 +128,7 @@ function isFlagAlias(arg: string): boolean {
 
 export function parseArgs<T extends InterfaceSpecification>(
   argv: string[],
-  spec: T
+  spec: T,
 ): ParsedArgs<T> {
   const { commands = [], args = [], flags = [], help, version } = spec;
   const result: ParsedArgsUnsafe = { command: null, args: {}, flags: {} };

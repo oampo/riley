@@ -1,12 +1,7 @@
 {
-  "compilerOptions": {
-    "outDir": "./build",
-    "allowJs": true,
-    "target": "es2021",
-    "moduleResolution": "node",
-    "allowSyntheticDefaultImports": true,
-    "module": "ES2020",
-    "strict": true
-  },
-  "include": ["./src/**/*"]
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.bin.json" },
+    { "path": "./tsconfig.lib.json" }
+  ]
 }

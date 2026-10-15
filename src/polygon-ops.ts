@@ -1,8 +1,8 @@
-import type { Position, Polygon, Geometry } from "martinez-polygon-clipping";
+import type { Geometry, Polygon, Position } from "martinez-polygon-clipping";
 import * as martinez from "martinez-polygon-clipping";
 
-import { vec2 } from "./math";
 import type { Line } from "./line";
+import { vec2 } from "./math";
 
 type MartinezFn = (subject: Geometry, clipping: Geometry) => Geometry;
 

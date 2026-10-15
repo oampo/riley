@@ -1,7 +1,6 @@
 import type { FirstOrderInterpolationFn, Vec4 } from "../math";
-
 import { lerp, remap, vec4 } from "../math";
-import { perlinTable, PERLIN_TABLE_HALF_SIZE } from "./perlin";
+import { PERLIN_TABLE_HALF_SIZE, perlinTable } from "./perlin";
 import { sumOctaves } from "./util";
 
 const PERLIN_GRADIENTS_4D = [
@@ -69,14 +68,14 @@ function perlinGradient4d(index: Vec4): Vec4 {
 export default sumOctaves(
   (
     value: Vec4,
-    { interpolate }: { interpolate: FirstOrderInterpolationFn }
+    { interpolate }: { interpolate: FirstOrderInterpolationFn },
   ): number => {
     // Wrap negative values
     value = vec4(
       value.x < 0 ? Number.MAX_SAFE_INTEGER + value.x : value.x,
       value.y < 0 ? Number.MAX_SAFE_INTEGER + value.y : value.y,
       value.z < 0 ? Number.MAX_SAFE_INTEGER + value.z : value.z,
-      value.w < 0 ? Number.MAX_SAFE_INTEGER + value.w : value.w
+      value.w < 0 ? Number.MAX_SAFE_INTEGER + value.w : value.w,
     );
     const gridIndex = value.floor();
     const gridPoint = value.sub(gridIndex);
@@ -85,8 +84,8 @@ export default sumOctaves(
         PERLIN_TABLE_HALF_SIZE,
         PERLIN_TABLE_HALF_SIZE,
         PERLIN_TABLE_HALF_SIZE,
-        PERLIN_TABLE_HALF_SIZE
-      )
+        PERLIN_TABLE_HALF_SIZE,
+      ),
     );
 
     // Find the gradient at the corners
@@ -148,31 +147,31 @@ export default sumOctaves(
         lerp(
           lerp(dot0, dot1, interpolate(0, 1, gridPoint.x)),
           lerp(dot2, dot3, interpolate(0, 1, gridPoint.x)),
-          interpolate(0, 1, gridPoint.y)
+          interpolate(0, 1, gridPoint.y),
         ),
         lerp(
           lerp(dot4, dot5, interpolate(0, 1, gridPoint.x)),
           lerp(dot6, dot7, interpolate(0, 1, gridPoint.x)),
-          interpolate(0, 1, gridPoint.y)
+          interpolate(0, 1, gridPoint.y),
         ),
-        interpolate(0, 1, gridPoint.z)
+        interpolate(0, 1, gridPoint.z),
       ),
       lerp(
         lerp(
           lerp(dot8, dot9, interpolate(0, 1, gridPoint.x)),
           lerp(dot10, dot11, interpolate(0, 1, gridPoint.x)),
-          interpolate(0, 1, gridPoint.y)
+          interpolate(0, 1, gridPoint.y),
         ),
         lerp(
           lerp(dot12, dot13, interpolate(0, 1, gridPoint.x)),
           lerp(dot14, dot15, interpolate(0, 1, gridPoint.x)),
-          interpolate(0, 1, gridPoint.y)
+          interpolate(0, 1, gridPoint.y),
         ),
-        interpolate(0, 1, gridPoint.z)
+        interpolate(0, 1, gridPoint.z),
       ),
-      interpolate(0, 1, gridPoint.w)
+      interpolate(0, 1, gridPoint.w),
     );
 
     return remap(result, -1, 1, 0, 1);
-  }
+  },
 );

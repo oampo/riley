@@ -6,19 +6,9 @@
   "main": "index.js",
   "scripts": {
     "start": "riley start -d sketches",
-    "sketch:create": "riley create sketch -d sketches",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky install",
-    "lint": "eslint",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "sketch:create": "riley create sketch -d sketches"
   },
   "dependencies": {
-    "riley": "file:/~/code/js/riley"
-  },
-  "devDependencies": {
-    "eslint": "^7.32.0",
-    "husky": "^7.0.1",
-    "prettier": "^2.3.2"
+    "riley": "file:/~/code/riley"
   }
 }

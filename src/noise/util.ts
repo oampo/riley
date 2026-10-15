@@ -4,22 +4,22 @@ type NoiseInputValue = number | Vec2 | Vec3 | Vec4;
 
 type NoiseFn<InputValue, Options> = (
   value: InputValue,
-  options: Options
+  options: Options,
 ) => number;
 
-interface OctaveNoiseOptions {
+export interface OctaveNoiseOptions {
   octaves?: number;
   decay?: number;
   lacunarity?: number;
 }
 
 export function sumOctaves<InputValue extends NoiseInputValue, NoiseFnOptions>(
-  fn: NoiseFn<InputValue, NoiseFnOptions>
+  fn: NoiseFn<InputValue, NoiseFnOptions>,
 ) {
   return function (
     value: InputValue,
-    options: OctaveNoiseOptions & NoiseFnOptions
-  ) {
+    options: OctaveNoiseOptions & NoiseFnOptions,
+  ): number {
     const { octaves = 4, decay = 0.5, lacunarity = 2, ...rest } = options;
     let frequency = 1;
     let amplitude = 1;

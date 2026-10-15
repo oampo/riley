@@ -1,7 +1,7 @@
 import RBush from "rbush";
 import knn from "rbush-knn";
 
-import config from "./config";
+import { getConfig } from "./config";
 import type { Line } from "./line";
 
 interface RTreeNode {
@@ -19,7 +19,7 @@ export function spatialSort(lines: Line[]): Line[] {
     return lines;
   }
 
-  const tree = new RBush();
+  const tree = new RBush<RTreeNode>();
 
   const nodes = [];
   // We'll draw the first line first, so only need to add the remaining lines
@@ -78,7 +78,9 @@ export function spatialSort(lines: Line[]): Line[] {
 
     // Remove nodes for the start and end points from the tree
     tree.remove(nearest);
-    tree.remove(nearest.partner);
+    if (nearest.partner) {
+      tree.remove(nearest.partner);
+    }
   }
   return new_lines;
 }
@@ -89,7 +91,7 @@ interface MergeOptions {
 
 export function mergeNearby(
   lines: Line[],
-  { mergeThreshold = config.mergeThreshold }: MergeOptions = {}
+  { mergeThreshold = getConfig().mergeThreshold }: MergeOptions = {},
 ): Line[] {
   const thresholdSquared = mergeThreshold ** 2;
 
@@ -105,10 +107,7 @@ export function mergeNearby(
   for (let i = 1; i < lines.length; i++) {
     const { vertices, color } = lines[i];
 
-    if (
-      line.color.equals(color) &&
-      vertices[0].sqrDist(end) <= thresholdSquared
-    ) {
+    if (line.color.eq(color) && vertices[0].sqrDist(end) <= thresholdSquared) {
       line.vertices.push(...vertices.slice(1));
     } else {
       line = lines[i];
