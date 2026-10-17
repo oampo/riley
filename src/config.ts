@@ -31,7 +31,6 @@ export type ConfigOpts = {
   readonly timestep: number;
   readonly defaultResolution: number;
   readonly epsilon: number;
-  readonly absoluteComparisonThreshold: number;
   readonly seed: number | string;
 };
 
@@ -49,8 +48,7 @@ class ConfigImpl implements Config {
   readonly backgroundColor: RgbaColor = rgb(1, 1, 1);
   readonly timestep: number = 1 / 60;
   readonly defaultResolution: number = 2;
-  readonly epsilon: number = Number.EPSILON * 128;
-  readonly absoluteComparisonThreshold: number = Number.MIN_VALUE;
+  readonly epsilon: number = 1E-6;
   readonly seed: number | string = randomId();
 
   private constructor() {}

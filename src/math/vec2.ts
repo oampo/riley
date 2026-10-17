@@ -50,25 +50,25 @@ export class Vec2Impl implements Vec2 {
   }
 
   add(a: Vec2): Vec2 {
-    const x = this.x + a.y;
+    const x = this.x + a.x;
     const y = this.y + a.y;
     return vec2(x, y);
   }
 
   sub(a: Vec2): Vec2 {
-    const x = this.x - a.y;
+    const x = this.x - a.x;
     const y = this.y - a.y;
     return vec2(x, y);
   }
 
   mul(a: Vec2): Vec2 {
-    const x = this.x * a.y;
+    const x = this.x * a.x;
     const y = this.y * a.y;
     return vec2(x, y);
   }
 
   div(a: Vec2): Vec2 {
-    const x = this.x / a.y;
+    const x = this.x / a.x;
     const y = this.y / a.y;
     return vec2(x, y);
   }
@@ -115,7 +115,7 @@ export class Vec2Impl implements Vec2 {
     const cosAngle = Math.cos(angle);
 
     const x = x0 * cosAngle - y0 * sinAngle + center.x;
-    const y = x0 * sinAngle - y0 * cosAngle + center.y;
+    const y = x0 * sinAngle + y0 * cosAngle + center.y;
     return vec2(x, y);
   }
 

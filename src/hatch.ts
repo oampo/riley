@@ -45,12 +45,11 @@ export function hatch(
     polygonHash,
   }: HatchOptions = {},
 ): Line[] {
-  // Approach: render a hatched square the size of the bounding box diagonal,
+  // Approach: render a hatched square the size of the largest page dimension,
   // then clip the box to the polygon
   const { tl, br } = boundingBox(polygon);
-  const size = br.sub(tl);
   const center = br.lerp(tl, 0.5);
-  const squareSize = size.len();
+  const squareSize = Math.max(getConfig().size.x, getConfig().size.y);
   const spacingFn = getSpacingFn(spacing);
 
   const lines = [];
@@ -78,9 +77,9 @@ export function hatch(
   }
 
   const clipped = lines.flatMap((l) => {
-    translate(l, vec2(-width / 2, -squareSize / 2));
-    rotate(l, angle);
-    translate(l, center);
+    l = translate(l, vec2(-width / 2, -squareSize / 2));
+    l = rotate(l, angle);
+    l = translate(l, center);
     return clip(l, polygon, { polygonHash });
   });
 
