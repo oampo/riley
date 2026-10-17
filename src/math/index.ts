@@ -1,4 +1,4 @@
-export { floatEq } from "./eq";
+export { floatEq, floatGte, floatLte } from "./eq";
 export type { FirstOrderInterpolationFn } from "./interpolate";
 export { lerp, smootherstep, smoothstep } from "./interpolate";
 export { clamp, remap } from "./range";

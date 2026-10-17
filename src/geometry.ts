@@ -1,7 +1,7 @@
 import type { Line } from "./line";
 import { line } from "./line";
 import type { Vec2 } from "./math";
-import { vec2 } from "./math";
+import { floatGte, floatLte, vec2 } from "./math";
 import type { SpatialHash } from "./spatial-hash";
 import { spatialHashRastered } from "./spatial-hash";
 
@@ -29,23 +29,29 @@ export function segmentIntersectsSegment(
   endA: Vec2,
   startB: Vec2,
   endB: Vec2,
-): Vec2 | null {
+): Vec2 | undefined {
   const diffA = endA.sub(startA);
   const diffB = endB.sub(startB);
 
   const diffStarts = startB.sub(startA);
 
-  const crossA = diffStarts.cross(diffA).z;
-  const crossB = diffStarts.cross(diffB).z;
   const crossAB = diffA.cross(diffB).z;
 
-  const s = crossA / crossAB;
-  const t = crossB / crossAB;
-
-  if (s > 0 && s < 1 && t > 0 && t < 1) {
-    return startA.add(diffA.scale(t));
+  if (crossAB === 0) {
+    // Parallel segments
+    return;
   }
-  return null;
+
+  const crossA = diffStarts.cross(diffA).z;
+  const crossB = diffStarts.cross(diffB).z;
+
+  const s = crossB / crossAB;
+  const t = crossA / crossAB;
+
+  if (floatGte(s, 0) && floatLte(s, 1) && floatGte(t, 0) && floatLte(t, 1)) {
+    return startA.add(diffA.scale(s));
+  }
+  return;
 }
 
 interface Intersection {
@@ -145,6 +151,7 @@ function lineIntersectsLineHashed(
 
 interface LineIntersectsLineOptions {
   sort?: boolean;
+  unique?: boolean;
   hashA?: SpatialHash<number>;
   hashB?: SpatialHash<number>;
 }
@@ -152,7 +159,7 @@ interface LineIntersectsLineOptions {
 export function lineIntersectsLine(
   lineA: Line,
   lineB: Line,
-  { sort = false, hashA, hashB }: LineIntersectsLineOptions = {},
+  { sort = false, unique = true, hashA, hashB }: LineIntersectsLineOptions = {},
 ): Intersection[] {
   const { vertices: verticesA } = lineA;
 
@@ -167,6 +174,25 @@ export function lineIntersectsLine(
     intersections = lineIntersectsLineHashed(lineA, lineB, hashA, hashB);
   } else {
     intersections = lineIntersectsLineBruteForce(lineA, lineB);
+  }
+
+  if (unique) {
+    const uniqueIntersections = [];
+    for (let i = 0; i < intersections.length; i++) {
+      const intersectionA = intersections[i];
+      let isUnique = true;
+      for (let j = i + 1; j < intersections.length; j++) {
+        const intersectionB = intersections[j];
+        if (intersectionA.vertex.eq(intersectionB.vertex)) {
+          isUnique = false;
+          break;
+        }
+      }
+      if (isUnique) {
+        uniqueIntersections.push(intersectionA);
+      }
+    }
+    intersections = uniqueIntersections;
   }
 
   if (sort) {
