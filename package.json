@@ -14,6 +14,12 @@
     "build:lib": "npm run build:lib:bundle && npm run build:lib:declarations",
     "build:lib:bundle": "esbuild --bundle src/index.ts --outdir=build --sourcemap --format=esm",
     "build:lib:declarations": "tsc -p tsconfig.lib.json --emitDeclarationOnly",
+    "watch": "concurrently -n cli,lib \"npm run watch:cli\" \"npm run watch:lib\"",
+    "watch:cli": "npm run watch:cli:bundle",
+    "watch:cli:bundle": "npm run build:cli:bundle -- --watch",
+    "watch:lib": "concurrently -n b,d -c green,yellow \"npm run watch:lib:bundle\" \"npm run watch:lib:declarations\"",
+    "watch:lib:bundle": "npm run build:lib:bundle -- --watch",
+    "watch:lib:declarations": "npm run build:lib:declarations -- --watch --preserveWatchOutput",
     "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
@@ -32,16 +38,17 @@
     "@types/rbush": "^4.0.0",
     "@typescript-eslint/eslint-plugin": "^8.71.1",
     "@typescript-eslint/parser": "^8.71.1",
+    "concurrently": "^10.0.6",
     "eslint": "^8.57.1",
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "husky": "^9.1.7",
     "prettier": "^3.9.9"
   },
   "dependencies": {
-    "typescript": "^6.0.3",
     "esbuild": "^0.28.2",
     "martinez-polygon-clipping": "^0.9.0",
     "rbush": "^4.0.1",
-    "rbush-knn": "^4.0.0"
+    "rbush-knn": "^4.0.0",
+    "typescript": "^6.0.3"
   }
 }
