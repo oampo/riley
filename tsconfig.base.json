@@ -5,6 +5,17 @@
     "target": "ES2024",
     "module": "es2022",
     "strict": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "@serialport/bindings-interface": [
+        "./node_modules/@serialport/bindings-interface/dist/index.d.ts"
+      ],
+      "@serialport/bindings-interface/*": [
+        "./node_modules/@serialport/bindings-interface/dist/*"
+      ],
+      "@serialport/binding-mock": [
+        "./node_modules/@serialport/binding-mock/dist/index.d.ts"
+      ]
+    }
   }
 }

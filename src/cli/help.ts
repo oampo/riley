@@ -66,6 +66,28 @@ Options:
   --help      Show this help information`,
 };
 
+export const plotterHelp: CommandHelp = {
+  name: "riley plotter",
+  description: "Work with a plotter",
+  usage: `Usage:
+  riley plotter list
+  riley plotter --help
+
+Options:
+  --help      Show this help information`,
+};
+
+export const plotterListHelp: CommandHelp = {
+  name: "riley plotter list",
+  description: "List attached plotters",
+  usage: `Usage:
+  riley plotter list
+  riley plotter list --help
+
+Options:
+  --help      Show this help information`,
+};
+
 export function printHelp(help: CommandHelp): void {
   console.log(help.name);
   console.log();

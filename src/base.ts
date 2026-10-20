@@ -18,3 +18,7 @@ export class UnreachableError extends Error {
     super(`Unhandled case: ${JSON.stringify(x)}`);
   }
 }
+
+export function exists<T>(t: T | undefined | null): t is T {
+  return t != null;
+}

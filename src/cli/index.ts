@@ -5,6 +5,7 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { listPlotters } from "../plotter";
 import { VERSION } from "../version.js";
 import { parseArgs } from "./arg-parser.js";
 import startDevServer from "./dev-server.js";
@@ -13,6 +14,8 @@ import {
   createSketchbookHelp,
   createSketchHelp,
   help,
+  plotterHelp,
+  plotterListHelp,
   startHelp,
 } from "./help.js";
 
@@ -72,6 +75,22 @@ const argSpec = {
           },
         ] as const,
         help: startHelp,
+      },
+    },
+    {
+      name: "plotter",
+      spec: {
+        commands: [
+          {
+            name: "list",
+            spec: {
+              args: [],
+              flags: [],
+              help: plotterListHelp,
+            },
+          },
+        ],
+        help: plotterHelp,
       },
     },
   ] as const,
@@ -213,6 +232,10 @@ async function main(): Promise<void> {
       case "start": {
         const { flags } = command;
         startDevServer(flags.directory);
+        break;
+      }
+      case "plotter": {
+        await listPlotters();
         break;
       }
     }
