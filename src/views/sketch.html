@@ -53,6 +53,7 @@
       const height = svg.getAttribute("data-height");
       container.style.aspectRatio = `${width} / ${height}`;
       container.appendChild(svg);
+      sketch.default.run();
     </script>
     <script>
       const eventSource = new EventSource("{{ EVENT_URL }}");

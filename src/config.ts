@@ -23,7 +23,6 @@ export type PaperOrientation = "portrait" | "landscape";
 export type ConfigOpts = {
   readonly paperSize: PaperSize;
   readonly paperOrientation: PaperOrientation;
-  readonly autoplay: boolean;
   readonly defaultColor: RgbaColor;
   readonly defaultWeight: number;
   readonly mergeThreshold: number;
@@ -41,7 +40,6 @@ export type Config = Omit<ConfigOpts, "paper"> & {
 class ConfigImpl implements Config {
   readonly paperSize: PaperSize = "A3";
   readonly paperOrientation: PaperOrientation = "portrait";
-  readonly autoplay: boolean = true;
   readonly defaultColor: RgbaColor = rgb(0, 0, 0);
   readonly defaultWeight: number = 1;
   readonly mergeThreshold: number = 1;

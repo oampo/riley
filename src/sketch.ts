@@ -6,40 +6,52 @@ import { getConfig, setConfig } from "./config";
 import type { Line } from "./line";
 import type { Vec2 } from "./math/vec2";
 import { noiseSeed } from "./noise";
-import { mergeNearby, spatialSort } from "./optimize";
 import { randomSeed } from "./random";
 
 export interface Sketch {
   getElement(): SVGSVGElement;
-  play(): void;
-  pause(): void;
-  requestExport(): void;
+  run(): void;
+  export(): Line[];
 }
 
-type SetupFn = (config: Config) => void;
-type DrawFn = (config: Config) => Line | Line[];
-type UpdateFn = (timestep: number, config: Config) => void;
+type SetupFn<T> = (opts: SetupOpts) => T;
+type SetupOpts = {
+  config: Config;
+};
+type UpdateFn<T> = (opts: UpdateOpts<T>) => T | undefined;
+type UpdateOpts<T> = {
+  state: T;
+  config: Config;
+};
+type DrawFn<T> = (opts: DrawOpts<T>) => Line[];
+type DrawOpts<T> = {
+  state: T;
+  config: Config;
+};
 
-interface Listeners {
-  setup?: SetupFn;
-  draw: DrawFn;
-  update?: UpdateFn;
-}
+type StaticListeners = {
+  draw: DrawFn<void>;
+};
+type AnimatedListeners<T> = {
+  setup: SetupFn<T>;
+  update: UpdateFn<T>;
+  draw: DrawFn<T>;
+};
+type Listeners<T> = StaticListeners | AnimatedListeners<T>;
 
-class SketchImpl implements Sketch {
+class SketchImpl<T> implements Sketch {
   private readonly svg: SVGSVGElement;
   private readonly config: Config;
-  private shouldExport: boolean = false;
   private playing: boolean = false;
-  private frameCount: number = 0;
   private lastUpdateTime: number = Date.now();
+  private state: T | undefined;
 
   constructor(
-    private readonly listeners: Listeners,
-    options: Partial<Config> | undefined,
+    private readonly listeners: Listeners<T>,
+    config: Partial<Config> | undefined,
   ) {
-    if (options) {
-      setConfig(options);
+    if (config) {
+      setConfig(config);
     }
 
     this.config = getConfig();
@@ -48,26 +60,10 @@ class SketchImpl implements Sketch {
     noiseSeed();
 
     this.svg = this.createSvg();
-
-    if (listeners.update && this.config.autoplay) {
-      this.start();
-    } else {
-      requestAnimationFrame(() => this.render());
-    }
   }
 
   getElement(): SVGSVGElement {
     return this.svg;
-  }
-
-  play(): void {}
-
-  pause(): void {
-    this.playing = false;
-  }
-
-  requestExport(): void {
-    this.shouldExport = true;
   }
 
   private createSvg(): SVGSVGElement {
@@ -83,63 +79,97 @@ class SketchImpl implements Sketch {
     return svg;
   }
 
-  private start(): void {
-    if (!this.listeners.update) {
-      throw new Error("Must have an update listener to play");
+  private get animatedListeners(): AnimatedListeners<T> | undefined {
+    if ("update" in this.listeners) {
+      return this.listeners;
     }
-    this.playing = true;
-    this.lastUpdateTime = Date.now();
-    requestAnimationFrame(() => this.tick());
+  }
+
+  private get staticListeners(): StaticListeners | undefined {
+    if (!("update" in this.listeners)) {
+      return this.listeners;
+    }
+  }
+
+  run(): void {
+    if (this.animatedListeners) {
+      this.state = this.animatedListeners.setup({ config: this.config });
+      this.render();
+      this.playing = true;
+      this.lastUpdateTime = Date.now();
+      requestAnimationFrame(() => this.tick());
+    } else {
+      this.render();
+    }
   }
 
   private tick(): void {
-    if (!this.playing) {
+    const { playing, lastUpdateTime, config } = this;
+    if (!playing) {
       return;
     }
 
-    const { timestep } = this.config;
+    const listeners = checkExists(this.animatedListeners);
+    const { timestep } = config;
     const time = Date.now();
-    while (time - this.lastUpdateTime > timestep * 1000) {
-      checkExists(this.listeners.update)(timestep, this.config);
+    while (time - lastUpdateTime > timestep * 1000) {
+      const newState = listeners.update({
+        config,
+        state: checkExists(this.state),
+      });
+      if (newState == null) {
+        this.playing = false;
+      }
+      this.state = newState;
       this.lastUpdateTime += timestep * 1000;
     }
 
     this.render();
-    this.frameCount += 1;
 
     requestAnimationFrame(() => this.tick());
   }
 
-  private render(): void {
-    const lines = this.listeners.draw(this.config);
-    this.renderLines(lines, this.shouldExport);
-
-    if (this.shouldExport) {
-      const svgText = this.svg.outerHTML;
-      void fetch("/api/export", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          content: svgText,
-          sketch: window.location.pathname
-            .slice(1)
-            .replace(/(\/(index.html)?)?$/, ""),
-          frameCount: this.frameCount,
-          seed: this.config.seed,
-        }),
-      });
+  export(): Line[] {
+    const { config, animatedListeners } = this;
+    let lines: Line[] | undefined;
+    if (animatedListeners) {
+      this.state = animatedListeners.setup({ config });
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const newState = animatedListeners.update({
+          config,
+          state: checkExists(this.state),
+        });
+        if (newState == null) {
+          break;
+        }
+        this.state = newState;
+      }
+      lines = this.generateLines();
+    } else {
+      lines = this.generateLines();
     }
 
-    this.shouldExport = false;
+    return checkExists(lines);
   }
 
-  private renderLines(lines: Line | Line[], optimize = false): void {
-    if (!Array.isArray(lines)) {
-      lines = [lines];
-    }
+  private render(): void {
+    const lines = this.generateLines();
+    this.renderLines(lines);
+  }
 
+  private generateLines(): Line[] {
+    const { config, animatedListeners, staticListeners, state } = this;
+    let lines: Line[] | undefined;
+    if (animatedListeners) {
+      lines = animatedListeners.draw({ config, state: checkExists(state) });
+    } else if (staticListeners) {
+      lines = staticListeners.draw({ config, state: undefined });
+    }
+    return checkExists(lines);
+  }
+
+  private renderLines(lines: Line[], optimize = false): void {
     if (!lines.length) {
       this.svg.replaceChildren();
     }
@@ -159,13 +189,7 @@ class SketchImpl implements Sketch {
 
     const layers: SVGGElement[] = [];
     for (const entry of linesByLayerId.entries()) {
-      const [layerId] = entry;
-      let [, lines] = entry;
-
-      if (optimize) {
-        lines = spatialSort(lines);
-        lines = mergeNearby(lines);
-      }
+      const [layerId, lines] = entry;
 
       const layer = document.createElementNS("http://www.w3.org/2000/svg", "g");
       layer.setAttributeNS(
@@ -220,8 +244,8 @@ class SketchImpl implements Sketch {
   }
 }
 
-export function sketch(
-  listeners: Listeners,
+export function sketch<T>(
+  listeners: Listeners<T>,
   options?: Partial<Config>,
 ): Sketch {
   return new SketchImpl(listeners, options);
