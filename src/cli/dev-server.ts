@@ -1,11 +1,11 @@
-import esbuild from "esbuild";
 import * as fs from "fs/promises";
 import * as http from "http";
 import * as path from "path";
-import * as ts from "typescript";
 import * as url from "url";
 
-import { checkExists, checkState } from "../base";
+import { checkState } from "../base";
+import type { Compiler } from "./compiler";
+import { BuildResultType, compiler } from "./compiler";
 
 interface DevServer {
   start(): void;
@@ -13,6 +13,7 @@ interface DevServer {
 
 interface Sketch {
   path: string;
+  dir: string;
   entryPoint: string;
   state:
     | { status: "pending"; promise: Promise<void> }
@@ -52,6 +53,7 @@ interface Route {
 }
 
 class DevServerImpl implements DevServer {
+  private readonly compiler: Compiler = compiler();
   private readonly sketchMap: Map<string, Sketch> = new Map();
   private readonly server: http.Server;
   private static listenerId: number = 0;
@@ -259,6 +261,7 @@ class DevServerImpl implements DevServer {
       sketch = {
         path: sketchPath,
         entryPoint,
+        dir: this.sketchDir(sketchPath),
         state: { status: "pending", promise },
         listeners: {},
       };
@@ -279,6 +282,10 @@ class DevServerImpl implements DevServer {
     return path.join(this.dir, sketchPath, "src", "index.ts");
   }
 
+  private sketchDir(sketchPath: string): string {
+    return path.join(this.dir, sketchPath);
+  }
+
   private notifyListeners(sketch: Sketch): void {
     const payload = JSON.stringify({
       reload: true,
@@ -288,125 +295,32 @@ class DevServerImpl implements DevServer {
     }
   }
 
-  private typeCheck(entryPoint: string): BuildError[] | undefined {
-    const entryDir = path.dirname(path.resolve(entryPoint));
-    const configFile = checkExists(
-      ts.findConfigFile(entryDir, (f) => ts.sys.fileExists(f)),
-      "Could not find tsconfig.json",
-    );
-    const configFileText = checkExists(
-      ts.sys.readFile(configFile),
-      "Could not read tsconfig.json",
-    );
-    const configJson = ts.parseConfigFileTextToJson(configFile, configFileText);
-    checkState(!configJson.error, "Could not parse tsconfig.json");
-
-    const config = ts.parseJsonConfigFileContent(
-      configJson.config,
-      ts.sys,
-      path.dirname(configFile),
-    );
-
-    const program = ts.createProgram([entryPoint], {
-      ...config.options,
-      noEmit: true,
-    });
-    const diagnostics = ts.getPreEmitDiagnostics(program);
-
-    const errors: BuildError[] = [];
-
-    for (const diagnostic of diagnostics) {
-      const text = ts.flattenDiagnosticMessageText(
-        diagnostic.messageText,
-        "\n",
-      );
-      let location: BuildError["location"] | undefined;
-
-      if (diagnostic.file && diagnostic.start !== undefined) {
-        const { line, character } =
-          diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
-        location = {
-          file: diagnostic.file.fileName,
-          line: line + 1,
-          column: character,
-          lineText: diagnostic.file.text.split(/\r?\n/)[line],
-        };
-      }
-
-      const error: BuildError = {
-        text,
-        location,
-      };
-
-      if (diagnostic.category === ts.DiagnosticCategory.Error) {
-        errors.push(error);
-      }
-    }
-
-    return errors.length ? errors : undefined;
-  }
-
   private async build(sketch: Sketch, resolve: () => void): Promise<void> {
     let isFirstBuild = true;
 
-    let ctx: esbuild.BuildContext;
-    let tsErrors: BuildError[] | undefined;
-    try {
-      ctx = await esbuild.context({
-        entryPoints: [sketch.entryPoint],
-        bundle: true,
-        write: false,
-        outdir: "",
-        globalName: "sketch",
-        plugins: [
-          {
-            name: "notifyPlugin",
-            setup: (build): void => {
-              build.onStart(() => {
-                tsErrors = this.typeCheck(sketch.entryPoint);
-              });
-              build.onEnd((result) => {
-                if (tsErrors) {
-                  sketch.state = {
-                    status: "error",
-                    errors: tsErrors,
-                  };
-                } else if (result.errors.length) {
-                  sketch.state = {
-                    status: "error",
-                    errors: result.errors.map(({ text, location }) => ({
-                      text,
-                      location: location ?? undefined,
-                    })),
-                  };
-                } else {
-                  checkState(
-                    result.outputFiles != null &&
-                      result.outputFiles.length != 0,
-                    "Expected result containing output files",
-                  );
-                  sketch.state = {
-                    status: "success",
-                    text: result.outputFiles[0].text,
-                  };
-                }
-
-                if (isFirstBuild) {
-                  isFirstBuild = false;
-                  resolve();
-                } else {
-                  this.notifyListeners(sketch);
-                }
-              });
-            },
-          },
-        ],
-      });
-    } catch {
-      throw new Error("Unexpected failure of initial build");
-    }
-
-    await ctx.watch();
+    await this.compiler.watch(sketch.dir, (result) => {
+      switch (result.type) {
+        case BuildResultType.SUCCESS: {
+          sketch.state = {
+            status: "success",
+            text: result.text,
+          };
+          break;
+        }
+        case BuildResultType.ERROR: {
+          sketch.state = {
+            status: "error",
+            errors: result.errors,
+          };
+        }
+      }
+      if (isFirstBuild) {
+        isFirstBuild = false;
+        resolve();
+      } else {
+        this.notifyListeners(sketch);
+      }
+    });
   }
 
   private renderErrors(errors: BuildError[]): string {
