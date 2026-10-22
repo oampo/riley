@@ -102,17 +102,26 @@ export class GrblPlotter<ExtCommand extends string> implements Plotter {
   async query(
     command: GrblCommand | ExtCommand,
     {
-      timeout = 1000,
+      timeout = 10000,
       expectOk = true,
-    }: { timeout?: number | undefined; expectOk?: boolean } = {},
+      optional = false,
+    }: {
+      timeout?: number | undefined;
+      expectOk?: boolean;
+      optional?: boolean;
+    } = {},
   ): Promise<string> {
     await this.sendCommand(command);
     const response = await this.readline({ timeout });
     if (response == null) {
       throw new Error("Query timed out without response");
     }
+    if (expectOk && optional && response === "ok") {
+      return "";
+    }
     if (expectOk) {
       const ok = await this.readline({ timeout });
+
       if (ok == null) {
         throw new Error("Query timed out without ok");
       }

@@ -21,14 +21,20 @@ export class IDrawHPlotterFactory implements PlotterFactory {
   async match(ports: PortInfo[]): Promise<PlotterInfo[]> {
     const promises = ports.map(async (port) => {
       if (
-        port.vendorId != "1A86" ||
+        port.vendorId != "1a86" ||
         (port.productId !== "7523" && port.productId !== "8040")
       ) {
         return Promise.resolve(undefined);
       }
       const plotter = new IDrawHPlotter(port);
       await plotter.connect();
-      const result = await plotter.handshake();
+      let result: { nickname?: string } | undefined;
+      try {
+        result = await plotter.handshake();
+      } finally {
+        await plotter.disconnect();
+      }
+
       if (!result) {
         return;
       }
@@ -68,16 +74,19 @@ class IDrawHPlotter implements Plotter {
     } catch {
       return;
     }
-    await this.plotter.flush();
-    await this.plotter.sendCommand(DrawcoreCommands.VERSION);
-    const version = await this.plotter.readline();
+    const version = await this.plotter.query(DrawcoreCommands.VERSION, {
+      expectOk: false,
+    });
     if (version == null || !version.startsWith("DrawCore")) {
       return;
     }
     let nickname: string | undefined = await this.plotter.query(
       DrawcoreCommands.QUERY_NICKNAME,
+      {
+        optional: true,
+      },
     );
-    if (nickname == null || nickname.length < 3) {
+    if (nickname.length < 3) {
       // Nicknames must be at least 3 characters long
       nickname = undefined;
     }
