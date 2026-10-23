@@ -10,6 +10,9 @@ export const help: CommandHelp = {
   riley start
   riley create sketchbook <directory>
   riley create sketch [--directory <dir>] <name>
+  riley export <directory>
+  riley optimize <file>
+  riley plotter list
   riley --help
   riley --version
 
@@ -50,7 +53,7 @@ export const createSketchbookHelp: CommandHelp = {
 
 Options:
   directory The directory to create the sketchbook
-  --help      Show this help information`,
+  --help    Show this help information`,
 };
 
 export const createSketchHelp: CommandHelp = {
@@ -74,7 +77,7 @@ export const plotterHelp: CommandHelp = {
   riley plotter --help
 
 Options:
-  --help      Show this help information`,
+  --help Show this help information`,
 };
 
 export const plotterListHelp: CommandHelp = {
@@ -85,19 +88,33 @@ export const plotterListHelp: CommandHelp = {
   riley plotter list --help
 
 Options:
-  --help      Show this help information`,
+  --help Show this help information`,
 };
 
 export const exportHelp: CommandHelp = {
   name: "riley export",
   description: "Export a sketch as JSON",
   usage: `Usage:
-  riley export <directory>
+  riley export [--outdir dir] <directory>
   riley export --help
 
 Options:
   directory The sketch directory
-  --help      Show this help information`,
+  --outdir  The directory to output the JSON 
+  --help    Show this help information`,
+};
+
+export const optimizeHelp: CommandHelp = {
+  name: "riley optimize",
+  description: "Optimize exported JSON for plotting",
+  usage: `Usage:
+  riley optimize [--outdir dir] <file>
+  riley optimize --help
+
+Options:
+  file   The exported JSON to optimize for plotting 
+  --outdir    The directory to output optimized JSON
+  --help Show this help information`,
 };
 
 export function printHelp(help: CommandHelp): void {
