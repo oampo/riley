@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import { UnreachableError } from "../base";
-import { listPlotters } from "../plotter";
+import { home, listPlotters } from "../plotter";
 import { VERSION } from "../version";
 import { parseArgs } from "./arg-parser";
 import startDevServer from "./dev-server";
@@ -19,6 +19,7 @@ import {
   help,
   optimizeHelp,
   plotterHelp,
+  plotterHomeHelp,
   plotterListHelp,
   startHelp,
 } from "./help";
@@ -92,6 +93,25 @@ const argSpec = {
               args: [],
               flags: [],
               help: plotterListHelp,
+            },
+          },
+          {
+            name: "home",
+            spec: {
+              args: [],
+              flags: [
+                {
+                  name: "port",
+                  alias: "p",
+                  type: "string",
+                },
+                {
+                  name: "nickname",
+                  alias: "n",
+                  type: "string",
+                },
+              ],
+              help: plotterHomeHelp,
             },
           },
         ],
@@ -271,6 +291,8 @@ async function main(): Promise<void> {
             await createSketch(directory, name);
             break;
           }
+          default:
+            throw new UnreachableError(subcommand);
         }
         break;
       }
@@ -280,6 +302,21 @@ async function main(): Promise<void> {
         break;
       }
       case "plotter": {
+        const { command: subcommand } = command;
+        switch (subcommand.name) {
+          case "list": {
+            await listPlotters();
+            break;
+          }
+          case "home": {
+            const { port, nickname } = subcommand.flags;
+            await home({ port, nickname });
+            break;
+          }
+          default:
+            throw new UnreachableError(subcommand);
+        }
+        break;
         await listPlotters();
         break;
       }

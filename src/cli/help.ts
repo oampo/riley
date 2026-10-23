@@ -13,6 +13,7 @@ export const help: CommandHelp = {
   riley export <directory>
   riley optimize <file>
   riley plotter list
+  riley plotter [--port <port>] [--nickname <nickname>] home
   riley --help
   riley --version
 
@@ -74,6 +75,7 @@ export const plotterHelp: CommandHelp = {
   description: "Work with a plotter",
   usage: `Usage:
   riley plotter list
+  riley plotter [--port <port>] [--nickname <nickname>] home
   riley plotter --help
 
 Options:
@@ -89,6 +91,19 @@ export const plotterListHelp: CommandHelp = {
 
 Options:
   --help Show this help information`,
+};
+
+export const plotterHomeHelp: CommandHelp = {
+  name: "riley plotter home",
+  description: "Moves the plotter to the home position",
+  usage: `Usage:
+  riley plotter [--port <port>] [--nickname <nickname>] home
+  riley plotter home --help
+
+Options:
+  --port     The port of the plotter to use,
+  --nickname The nickname of the plotter to use
+  --help     Show this help information`,
 };
 
 export const exportHelp: CommandHelp = {

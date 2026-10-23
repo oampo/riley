@@ -4,7 +4,10 @@ import { SerialPort } from "serialport";
 
 import type { Plotter } from ".";
 
-export const enum GrblCommand {}
+export const enum GrblCommand {
+  HOME = "$H",
+  SLEEP = "$SLP",
+}
 
 export class GrblPlotter<ExtCommand extends string> implements Plotter {
   private readonly port: SerialPort;
@@ -72,7 +75,7 @@ export class GrblPlotter<ExtCommand extends string> implements Plotter {
     return promise;
   }
 
-  flush(): Promise<void> {
+  private flush(): Promise<void> {
     const { promise, resolve, reject } = Promise.withResolvers<void>();
     this.port.flush((e) => {
       if (e) {
@@ -83,7 +86,7 @@ export class GrblPlotter<ExtCommand extends string> implements Plotter {
     return promise;
   }
 
-  sendCommand(command: GrblCommand | ExtCommand): Promise<void> {
+  private sendCommand(command: GrblCommand | ExtCommand): Promise<void> {
     const { promise, resolve, reject } = Promise.withResolvers<void>();
     this.port.write(`${command}\n`, "ascii", (e) => {
       if (e) {
@@ -132,5 +135,33 @@ export class GrblPlotter<ExtCommand extends string> implements Plotter {
     return response;
   }
 
+  async command(
+    command: GrblCommand | ExtCommand,
+    {
+      timeout = 10000,
+      expectOk = true,
+    }: { timeout?: number | undefined; expectOk?: boolean } = {},
+  ): Promise<void> {
+    await this.sendCommand(command);
+    if (expectOk) {
+      const ok = await this.readline({ timeout });
+
+      if (ok == null) {
+        throw new Error("Query timed out without ok");
+      }
+      if (ok !== "ok") {
+        throw new Error("Expected ok response");
+      }
+    }
+  }
+
   plot(): void {}
+
+  home(): Promise<void> {
+    return this.command(GrblCommand.HOME);
+  }
+
+  sleep(): Promise<void> {
+    return this.command(GrblCommand.SLEEP);
+  }
 }

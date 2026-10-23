@@ -13,9 +13,8 @@ export const enum DrawcoreCommands {
 
 export class IDrawHPlotterFactory implements PlotterFactory {
   readonly type: PlotterType = PlotterType.IDRAW_H;
-  create(_port: PortInfo): Plotter {
-    // Stub
-    return { plot(): void {} };
+  create(port: PortInfo): Plotter {
+    return new IDrawHPlotter(port);
   }
 
   async match(ports: PortInfo[]): Promise<PlotterInfo[]> {
@@ -106,5 +105,13 @@ class IDrawHPlotter implements Plotter {
 
   plot(): void {
     this.plotter.plot();
+  }
+
+  home(): Promise<void> {
+    return this.plotter.home();
+  }
+
+  sleep(): Promise<void> {
+    return this.plotter.sleep();
   }
 }
