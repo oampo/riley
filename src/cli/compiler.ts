@@ -57,8 +57,7 @@ class CompilerImpl implements Compiler {
         entryPoints: [entryPoint],
         bundle: true,
         write: false,
-        outdir: "",
-        globalName: "sketch",
+        format: "esm",
       });
       if (result.errors.length) {
         return {
@@ -97,8 +96,7 @@ class CompilerImpl implements Compiler {
         entryPoints: [entryPoint],
         bundle: true,
         write: false,
-        outdir: "",
-        globalName: "sketch",
+        format: "esm",
         plugins: [
           {
             name: "notifyPlugin",

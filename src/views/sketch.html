@@ -45,15 +45,14 @@
     <div class="vertical-center">
       <main id="root"></main>
     </div>
-    <script src="{{ INDEX_JS }}"></script>
-    <script>
-      const svg = sketch.default.getElement();
+    <script type="module">
+      import sketch from "{{ INDEX_JS  }}";
+      const svg = sketch.run();
       const container = document.getElementById("root");
       const width = svg.getAttribute("data-width");
       const height = svg.getAttribute("data-height");
       container.style.aspectRatio = `${width} / ${height}`;
       container.appendChild(svg);
-      sketch.default.run();
     </script>
     <script>
       const eventSource = new EventSource("{{ EVENT_URL }}");

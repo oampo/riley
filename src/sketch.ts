@@ -9,8 +9,8 @@ import { noiseSeed } from "./noise";
 import { randomSeed } from "./random";
 
 export interface Sketch {
-  getElement(): SVGSVGElement;
-  run(): void;
+  readonly config: Config;
+  run(): SVGSVGElement;
   export(): Line[];
 }
 
@@ -40,8 +40,8 @@ type AnimatedListeners<T> = {
 type Listeners<T> = StaticListeners | AnimatedListeners<T>;
 
 class SketchImpl<T> implements Sketch {
-  private readonly svg: SVGSVGElement;
-  private readonly config: Config;
+  private svg: SVGSVGElement | undefined;
+  readonly config: Config;
   private playing: boolean = false;
   private lastUpdateTime: number = Date.now();
   private state: T | undefined;
@@ -58,12 +58,6 @@ class SketchImpl<T> implements Sketch {
 
     randomSeed(this.config.seed);
     noiseSeed();
-
-    this.svg = this.createSvg();
-  }
-
-  getElement(): SVGSVGElement {
-    return this.svg;
   }
 
   private createSvg(): SVGSVGElement {
@@ -91,7 +85,8 @@ class SketchImpl<T> implements Sketch {
     }
   }
 
-  run(): void {
+  run(): SVGSVGElement {
+    this.svg = this.createSvg();
     if (this.animatedListeners) {
       this.state = this.animatedListeners.setup({ config: this.config });
       this.render();
@@ -101,6 +96,7 @@ class SketchImpl<T> implements Sketch {
     } else {
       this.render();
     }
+    return this.svg;
   }
 
   private tick(): void {
@@ -170,8 +166,9 @@ class SketchImpl<T> implements Sketch {
   }
 
   private renderLines(lines: Line[], optimize = false): void {
+    const svg = checkExists(this.svg);
     if (!lines.length) {
-      this.svg.replaceChildren();
+      svg.replaceChildren();
     }
 
     lines.sort((a, b) => layer(a) - layer(b));
@@ -240,7 +237,7 @@ class SketchImpl<T> implements Sketch {
       layers.push(layer);
     }
 
-    this.svg.replaceChildren(...layers);
+    svg.replaceChildren(...layers);
   }
 }
 

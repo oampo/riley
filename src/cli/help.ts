@@ -49,7 +49,7 @@ export const createSketchbookHelp: CommandHelp = {
   riley create sketchbook --help
 
 Options:
-  --directory The directory to create the sketchbook
+  directory The directory to create the sketchbook
   --help      Show this help information`,
 };
 
@@ -85,6 +85,18 @@ export const plotterListHelp: CommandHelp = {
   riley plotter list --help
 
 Options:
+  --help      Show this help information`,
+};
+
+export const exportHelp: CommandHelp = {
+  name: "riley export",
+  description: "Export a sketch as JSON",
+  usage: `Usage:
+  riley export <directory>
+  riley export --help
+
+Options:
+  directory The sketch directory
   --help      Show this help information`,
 };
 

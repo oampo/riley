@@ -37,7 +37,7 @@ export function gaussian(mean = 0, variance = 1): number {
   return mean + variance * gaussian01;
 }
 
-export function randomId(length = 32, alphabet = "0123456789abcdef"): string {
+export function randomId(length = 8, alphabet = "0123456789abcdef"): string {
   let result = "";
   for (let i = 0; i < length; i++) {
     result = result + alphabet[Math.floor(Math.random() * alphabet.length)];

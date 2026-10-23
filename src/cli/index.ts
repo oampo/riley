@@ -5,14 +5,17 @@ import fs from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";
 
+import { UnreachableError } from "../base";
 import { listPlotters } from "../plotter";
 import { VERSION } from "../version.js";
 import { parseArgs } from "./arg-parser.js";
 import startDevServer from "./dev-server.js";
+import { exportSketch } from "./export";
 import {
   createHelp,
   createSketchbookHelp,
   createSketchHelp,
+  exportHelp,
   help,
   plotterHelp,
   plotterListHelp,
@@ -91,6 +94,19 @@ const argSpec = {
           },
         ],
         help: plotterHelp,
+      },
+    },
+    {
+      name: "export",
+      spec: {
+        args: [
+          {
+            name: "directory",
+            type: "string",
+            required: true,
+          },
+        ] as const,
+        help: exportHelp,
       },
     },
   ] as const,
@@ -238,6 +254,13 @@ async function main(): Promise<void> {
         await listPlotters();
         break;
       }
+      case "export": {
+        const { args } = command;
+        await exportSketch(args.directory);
+        break;
+      }
+      default:
+        throw new UnreachableError(command);
     }
   } catch (e) {
     if (e instanceof Error) {
