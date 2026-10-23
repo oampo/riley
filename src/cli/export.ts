@@ -5,7 +5,10 @@ import { serialize } from "../line";
 import type { Sketch } from "../sketch";
 import { BuildResultType, compiler } from "./compiler";
 
-export async function exportSketch(sketchDir: string): Promise<void> {
+export async function exportSketch(
+  sketchDir: string,
+  outDir: string | undefined,
+): Promise<void> {
   const comp = compiler();
   const result = await comp.build(sketchDir);
   if (result.type !== BuildResultType.SUCCESS) {
@@ -21,7 +24,7 @@ export async function exportSketch(sketchDir: string): Promise<void> {
   const date = new Date().toISOString().split("T")[0];
   const filename = `${date}-${hash}-${seed}.json`;
 
-  const outputDir = path.join(sketchDir, "output");
+  const outputDir = outDir ?? path.join(sketchDir, "output");
   const filePath = path.join(outputDir, filename);
   await fs.mkdir(outputDir, { recursive: true });
   await fs.writeFile(filePath, serialized);

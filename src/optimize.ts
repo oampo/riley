@@ -119,3 +119,9 @@ export function mergeNearby(
 
   return new_lines;
 }
+
+export function optimize(lines: Line[]): Line[] {
+  lines = spatialSort(lines);
+  lines = mergeNearby(lines);
+  return lines;
+}

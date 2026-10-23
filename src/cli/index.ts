@@ -7,9 +7,9 @@ import { fileURLToPath } from "url";
 
 import { UnreachableError } from "../base";
 import { listPlotters } from "../plotter";
-import { VERSION } from "../version.js";
-import { parseArgs } from "./arg-parser.js";
-import startDevServer from "./dev-server.js";
+import { VERSION } from "../version";
+import { parseArgs } from "./arg-parser";
+import startDevServer from "./dev-server";
 import { exportSketch } from "./export";
 import {
   createHelp,
@@ -17,10 +17,12 @@ import {
   createSketchHelp,
   exportHelp,
   help,
+  optimizeHelp,
   plotterHelp,
   plotterListHelp,
   startHelp,
-} from "./help.js";
+} from "./help";
+import { optimize } from "./optimize";
 
 const argSpec = {
   commands: [
@@ -106,7 +108,34 @@ const argSpec = {
             required: true,
           },
         ] as const,
+        flags: [
+          {
+            name: "outdir",
+            type: "string",
+            alias: "o",
+          },
+        ] as const,
         help: exportHelp,
+      },
+    },
+    {
+      name: "optimize",
+      spec: {
+        args: [
+          {
+            name: "file",
+            type: "string",
+            required: true,
+          },
+        ] as const,
+        flags: [
+          {
+            name: "outdir",
+            type: "string",
+            alias: "o",
+          },
+        ] as const,
+        help: optimizeHelp,
       },
     },
   ] as const,
@@ -255,8 +284,13 @@ async function main(): Promise<void> {
         break;
       }
       case "export": {
-        const { args } = command;
-        await exportSketch(args.directory);
+        const { args, flags } = command;
+        await exportSketch(args.directory, flags.outdir);
+        break;
+      }
+      case "optimize": {
+        const { args, flags } = command;
+        await optimize(args.file, flags.outdir);
         break;
       }
       default:

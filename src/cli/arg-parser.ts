@@ -58,14 +58,14 @@ type BooleanArgValue<T extends BooleanFlag> = T["required"] extends true
   ? boolean
   : T["default"] extends boolean
     ? boolean
-    : boolean | null;
+    : boolean | undefined;
 
 type StringArgValue<T extends StringArgument | StringFlag> =
   T["required"] extends true
     ? string
     : T["default"] extends string
       ? string
-      : string | null;
+      : string | undefined;
 
 type ParsedPositionalArgs<T extends readonly Argument[]> = {
   [Key in IndexKeys<T> as Name<T[Key]>]: T[Key] extends StringArgument
@@ -95,7 +95,7 @@ type ParsedCommandArgs<T extends readonly Command[]> = {
 type ParsedArgs<T extends InterfaceSpecification> = {
   command: T["commands"] extends readonly Command[]
     ? ParsedCommandArgs<T["commands"]>
-    : null;
+    : undefined;
   args: T["args"] extends readonly Argument[]
     ? ParsedPositionalArgs<T["args"]>
     : Record<string, never>;
@@ -109,9 +109,9 @@ type ParsedArgsUnsafe = {
     | ({
         name: string;
       } & ParsedArgsUnsafe)
-    | null;
-  args: Record<string, string | null>;
-  flags: Record<string, string | boolean | null>;
+    | undefined;
+  args: Record<string, string | undefined>;
+  flags: Record<string, string | boolean | undefined>;
 };
 
 function isFlag(arg: string): boolean {
@@ -131,17 +131,17 @@ export function parseArgs<T extends InterfaceSpecification>(
   spec: T,
 ): ParsedArgs<T> {
   const { commands = [], args = [], flags = [], help, version } = spec;
-  const result: ParsedArgsUnsafe = { command: null, args: {}, flags: {} };
+  const result: ParsedArgsUnsafe = { command: undefined, args: {}, flags: {} };
 
   let isHelpRequest = false;
   let isVersionRequest = false;
 
   for (const arg of args) {
-    result.args[arg.name] = arg.default ? arg.default : null;
+    result.args[arg.name] = arg.default ? arg.default : undefined;
   }
 
   for (const flag of flags) {
-    result.flags[flag.name] = flag.default ? flag.default : null;
+    result.flags[flag.name] = flag.default ? flag.default : undefined;
   }
 
   for (const command of commands) {
@@ -235,7 +235,7 @@ export function parseArgs<T extends InterfaceSpecification>(
   }
 
   for (const arg of args) {
-    if (arg.required && result.args[arg.name] === null) {
+    if (arg.required && result.args[arg.name] == null) {
       console.error(`Expected argument: ${arg.name}`);
       console.error();
       console.error(help.usage);
@@ -244,7 +244,7 @@ export function parseArgs<T extends InterfaceSpecification>(
   }
 
   for (const flag of flags) {
-    if (flag.required && result.flags[flag.name] === null) {
+    if (flag.required && result.flags[flag.name] == null) {
       console.error(`Expected flag: ${flag.name}`);
       console.error();
       console.error(help.usage);
