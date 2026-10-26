@@ -8,6 +8,9 @@
     "start": "riley start -d sketches",
     "sketch:create": "riley create sketch -d sketches"
   },
+  "workspaces": [
+    "sketches/*"
+  ],
   "dependencies": {
     "riley": "file:/~/code/riley"
   }

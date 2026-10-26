@@ -1,0 +1,14 @@
+{
+  "name": "riley-sketch-template",
+  "version": "0.0.1",
+  "description": "A generative art sketch",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "export": "riley export",
+    "optimize": "riley optimize"
+  },
+  "workspaces": [
+    "sketches/*"
+  ]
+}

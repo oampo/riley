@@ -7,7 +7,7 @@ import { BuildResultType, compiler } from "./compiler";
 
 export async function exportSketch(
   sketchDir: string,
-  outDir: string | undefined,
+  outDir: string,
 ): Promise<void> {
   const comp = compiler();
   const result = await comp.build(sketchDir);
@@ -24,9 +24,8 @@ export async function exportSketch(
   const date = new Date().toISOString().split("T")[0];
   const filename = `${date}-${hash}-${seed}.json`;
 
-  const outputDir = outDir ?? path.join(sketchDir, "output");
-  const filePath = path.join(outputDir, filename);
-  await fs.mkdir(outputDir, { recursive: true });
+  const filePath = path.join(outDir, filename);
+  await fs.mkdir(outDir, { recursive: true });
   await fs.writeFile(filePath, serialized);
 }
 

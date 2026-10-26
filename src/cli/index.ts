@@ -121,18 +121,19 @@ const argSpec = {
     {
       name: "export",
       spec: {
-        args: [
+        args: [],
+        flags: [
           {
             name: "directory",
             type: "string",
-            required: true,
+            alias: "d",
+            default: "./",
           },
-        ] as const,
-        flags: [
           {
             name: "outdir",
             type: "string",
             alias: "o",
+            default: "./output/raw",
           },
         ] as const,
         help: exportHelp,
@@ -150,9 +151,16 @@ const argSpec = {
         ] as const,
         flags: [
           {
+            name: "directory",
+            type: "string",
+            alias: "d",
+            default: "./",
+          },
+          {
             name: "outdir",
             type: "string",
             alias: "o",
+            default: "./output/optimized",
           },
         ] as const,
         help: optimizeHelp,
@@ -317,17 +325,15 @@ async function main(): Promise<void> {
             throw new UnreachableError(subcommand);
         }
         break;
-        await listPlotters();
-        break;
       }
       case "export": {
-        const { args, flags } = command;
-        await exportSketch(args.directory, flags.outdir);
+        const { flags } = command;
+        await exportSketch(flags.directory, flags.outdir);
         break;
       }
       case "optimize": {
         const { args, flags } = command;
-        await optimize(args.file, flags.outdir);
+        await optimize(args.file, flags.directory, flags.outdir);
         break;
       }
       default:
