@@ -75,7 +75,7 @@ export const plotterHelp: CommandHelp = {
   description: "Work with a plotter",
   usage: `Usage:
   riley plotter list
-  riley plotter [--port <port>] [--nickname <nickname>] home
+  riley plotter home [--directory <dir>]
   riley plotter --help
 
 Options:
@@ -97,12 +97,11 @@ export const plotterHomeHelp: CommandHelp = {
   name: "riley plotter home",
   description: "Moves the plotter to the home position",
   usage: `Usage:
-  riley plotter [--port <port>] [--nickname <nickname>] home
+  riley plotter home [--directory <dir>]
   riley plotter home --help
 
 Options:
-  --port     The port of the plotter to use,
-  --nickname The nickname of the plotter to use
+  --directory The sketch directory 
   --help     Show this help information`,
 };
 
@@ -110,11 +109,11 @@ export const exportHelp: CommandHelp = {
   name: "riley export",
   description: "Export a sketch as JSON",
   usage: `Usage:
-  riley export [--outdir dir] <directory>
+  riley export [--directory <dir>] [--outdir dir]
   riley export --help
 
 Options:
-  directory The sketch directory
+  --directory The sketch directory
   --outdir  The directory to output the JSON 
   --help    Show this help information`,
 };
@@ -123,11 +122,12 @@ export const optimizeHelp: CommandHelp = {
   name: "riley optimize",
   description: "Optimize exported JSON for plotting",
   usage: `Usage:
-  riley optimize [--outdir dir] <file>
+  riley optimize [--directory <dir>] [--outdir dir] <file>
   riley optimize --help
 
 Options:
   file   The exported JSON to optimize for plotting 
+  --directory The sketch directory
   --outdir    The directory to output optimized JSON
   --help Show this help information`,
 };

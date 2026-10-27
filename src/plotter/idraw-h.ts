@@ -2,7 +2,7 @@ import type { PortInfo } from "@serialport/bindings-cpp";
 
 import { exists } from "../base";
 import type { Plotter, PlotterFactory, PlotterInfo } from ".";
-import { PlotterType } from ".";
+import { PlotterType } from "./config";
 import { GrblPlotter } from "./grbl-plotter";
 
 export const enum DrawcoreCommands {

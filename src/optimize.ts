@@ -91,7 +91,9 @@ interface MergeOptions {
 
 export function mergeNearby(
   lines: Line[],
-  { mergeThreshold = getConfig().mergeThreshold }: MergeOptions = {},
+  {
+    mergeThreshold = getConfig().optimization.mergeThreshold,
+  }: MergeOptions = {},
 ): Line[] {
   const thresholdSquared = mergeThreshold ** 2;
 

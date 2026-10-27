@@ -6,7 +6,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 import { UnreachableError } from "../base";
-import { home, listPlotters } from "../plotter";
+import { listPlotters } from "../plotter";
 import { VERSION } from "../version";
 import { parseArgs } from "./arg-parser";
 import startDevServer from "./dev-server";
@@ -24,6 +24,7 @@ import {
   startHelp,
 } from "./help";
 import { optimize } from "./optimize";
+import { home } from "./plotter";
 
 const argSpec = {
   commands: [
@@ -101,14 +102,10 @@ const argSpec = {
               args: [],
               flags: [
                 {
-                  name: "port",
-                  alias: "p",
+                  name: "directory",
                   type: "string",
-                },
-                {
-                  name: "nickname",
-                  alias: "n",
-                  type: "string",
+                  alias: "d",
+                  default: "./",
                 },
               ],
               help: plotterHomeHelp,
@@ -317,8 +314,8 @@ async function main(): Promise<void> {
             break;
           }
           case "home": {
-            const { port, nickname } = subcommand.flags;
-            await home({ port, nickname });
+            const { directory } = subcommand.flags;
+            await home(directory);
             break;
           }
           default:

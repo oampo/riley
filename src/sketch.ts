@@ -1,7 +1,7 @@
 import { layer, weight } from "./attribute";
 import { checkExists } from "./base";
 import { alpha, color, rgbaHex, rgbHex } from "./color";
-import type { Config } from "./config";
+import type { Config, PartialConfig } from "./config";
 import { getConfig, setConfig } from "./config";
 import type { Line } from "./line";
 import type { Vec2 } from "./math/vec2";
@@ -48,7 +48,7 @@ class SketchImpl<T> implements Sketch {
 
   constructor(
     private readonly listeners: Listeners<T>,
-    config: Partial<Config> | undefined,
+    config: PartialConfig | undefined,
   ) {
     if (config) {
       setConfig(config);
@@ -243,7 +243,7 @@ class SketchImpl<T> implements Sketch {
 
 export function sketch<T>(
   listeners: Listeners<T>,
-  options?: Partial<Config>,
+  config?: PartialConfig,
 ): Sketch {
-  return new SketchImpl(listeners, options);
+  return new SketchImpl(listeners, config);
 }

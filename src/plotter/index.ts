@@ -3,11 +3,8 @@ import { SerialPort } from "serialport";
 
 import { checkExists, exists } from "../base";
 import type { Line } from "../line";
+import type { PlotterConfig, PlotterType } from "./config";
 import { IDrawHPlotterFactory } from "./idraw-h";
-
-export const enum PlotterType {
-  IDRAW_H = "idraw_h",
-}
 
 export interface PlotterFactory {
   type: PlotterType;
@@ -42,41 +39,23 @@ export async function listPlotters(): Promise<void> {
   }
 }
 
-async function getPlotter({
+export async function getPlotter({
+  type,
   port,
   nickname,
-}: {
-  port: string | undefined;
-  nickname: string | undefined;
-}): Promise<Plotter | undefined> {
+}: Pick<PlotterConfig, "type" | "port" | "nickname">): Promise<
+  Plotter | undefined
+> {
   const ports = await SerialPort.list();
-  for (const factory of plotterFactories) {
-    const matches = await factory.match(ports);
-    for (const match of matches) {
-      if (
-        (port == null && nickname == null) ||
-        (port != null && match.port.path === port) ||
-        (nickname !== null && match.nickname == nickname)
-      ) {
-        return factory.create(match.port);
-      }
+  const factory = checkExists(plotterFactories.find((f) => f.type === type));
+  const matches = await factory.match(ports);
+  for (const match of matches) {
+    if (
+      (port == null && nickname == null) ||
+      (port != null && match.port.path === port) ||
+      (nickname !== null && match.nickname == nickname)
+    ) {
+      return factory.create(match.port);
     }
   }
-}
-
-export async function home({
-  port,
-  nickname,
-}: {
-  port: string | undefined;
-  nickname: string | undefined;
-}): Promise<void> {
-  const plotter = checkExists(
-    await getPlotter({ port, nickname }),
-    "Could not find plotter",
-  );
-  await plotter.connect();
-  await plotter.home();
-  await plotter.sleep();
-  await plotter.disconnect();
 }

@@ -32,6 +32,8 @@ export {
   vec4,
 } from "./math";
 export { perlin } from "./noise";
+export type { PlotterConfig } from "./plotter/config";
+export { PlotterType } from "./plotter/config";
 export { diff, intersection, union, xor } from "./polygon-ops";
 export { gaussian, random, randomInt } from "./random";
 export {

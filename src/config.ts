@@ -2,6 +2,8 @@ import type { RgbaColor } from "./color";
 import { rgb } from "./color";
 import type { Vec2 } from "./math";
 import { vec2 } from "./math";
+import type { PartialPlotterConfig, PlotterConfig } from "./plotter/config";
+import { mergePlotterConfig } from "./plotter/config";
 import { randomId } from "./random";
 
 export type PaperSize =
@@ -25,12 +27,24 @@ export type ConfigOpts = {
   readonly paperOrientation: PaperOrientation;
   readonly defaultColor: RgbaColor;
   readonly defaultWeight: number;
-  readonly mergeThreshold: number;
   readonly backgroundColor: RgbaColor;
   readonly timestep: number;
   readonly defaultResolution: number;
   readonly epsilon: number;
   readonly seed: number | string;
+  readonly optimization: OptimizationConfig;
+  readonly plotter: PlotterConfig | undefined;
+};
+
+export type PartialConfig = Partial<
+  Omit<ConfigOpts, "plotter" | "optimization">
+> & {
+  optimization?: Partial<OptimizationConfig>;
+  plotter?: PartialPlotterConfig | undefined;
+};
+
+type OptimizationConfig = {
+  readonly mergeThreshold: number;
 };
 
 export type Config = Omit<ConfigOpts, "paper"> & {
@@ -38,16 +52,19 @@ export type Config = Omit<ConfigOpts, "paper"> & {
 };
 
 class ConfigImpl implements Config {
-  readonly paperSize: PaperSize = "A3";
-  readonly paperOrientation: PaperOrientation = "portrait";
-  readonly defaultColor: RgbaColor = rgb(0, 0, 0);
-  readonly defaultWeight: number = 1;
-  readonly mergeThreshold: number = 1;
-  readonly backgroundColor: RgbaColor = rgb(1, 1, 1);
-  readonly timestep: number = 1 / 60;
-  readonly defaultResolution: number = 2;
-  readonly epsilon: number = 1e-6;
-  readonly seed: number | string = randomId();
+  paperSize: PaperSize = "A3";
+  paperOrientation: PaperOrientation = "portrait";
+  defaultColor: RgbaColor = rgb(0, 0, 0);
+  defaultWeight: number = 1;
+  backgroundColor: RgbaColor = rgb(1, 1, 1);
+  timestep: number = 1 / 60;
+  defaultResolution: number = 2;
+  epsilon: number = 1e-6;
+  seed: number | string = randomId();
+  optimization: {
+    mergeThreshold: number;
+  } = { mergeThreshold: 1 };
+  plotter: PlotterConfig | undefined;
 
   private constructor() {}
 
@@ -61,8 +78,30 @@ class ConfigImpl implements Config {
     return ConfigImpl.instance;
   }
 
-  merge(config: Partial<ConfigOpts>): void {
-    Object.assign(this, config);
+  merge(config: PartialConfig): void {
+    if (config.paperSize != null) {
+      this.paperSize = config.paperSize;
+    }
+    if (config.paperOrientation != null)
+      this.paperOrientation = config.paperOrientation;
+    if (config.defaultColor != null) this.defaultColor = config.defaultColor;
+    if (config.defaultWeight != null) this.defaultWeight = config.defaultWeight;
+    if (config.backgroundColor != null)
+      this.backgroundColor = config.backgroundColor;
+    if (config.timestep != null) this.timestep = config.timestep;
+    if (config.defaultResolution != null)
+      this.defaultResolution = config.defaultResolution;
+    if (config.epsilon != null) this.epsilon = config.epsilon;
+    if (config.seed != null) this.seed = config.seed;
+    if (config.optimization != null) {
+      this.optimization = {
+        ...this.optimization,
+        ...config.optimization,
+      };
+    }
+    if (config.plotter != null) {
+      this.plotter = mergePlotterConfig(config.plotter);
+    }
   }
 
   get size(): Vec2 {
@@ -105,7 +144,7 @@ export function getConfig(): Config {
   return ConfigImpl.create();
 }
 
-export function setConfig(c: Partial<ConfigOpts>): void {
+export function setConfig(c: PartialConfig): void {
   const config = ConfigImpl.create();
   config.merge(c);
 }
