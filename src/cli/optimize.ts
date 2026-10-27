@@ -4,7 +4,7 @@ import path from "node:path";
 import { deserialize } from "../line";
 import { serialize } from "../line";
 import { mergeNearby, spatialSort } from "../optimize";
-import { BuildResultType, compiler } from "./compiler";
+import { getSketch } from "./sketch";
 
 export async function optimize(
   filePath: string,
@@ -16,14 +16,7 @@ export async function optimize(
     throw new Error("Expected JSON file");
   }
 
-  const comp = compiler();
-  const result = await comp.build(sketchDir);
-  if (result.type !== BuildResultType.SUCCESS) {
-    throw new Error("Build failed when optimizing sketch");
-  }
-
-  const dataUrl = `data:text/javascript;charset=utf-8,${encodeURIComponent(result.text)}`;
-  await import(dataUrl);
+  await getSketch(sketchDir);
 
   const text = await fs.readFile(filePath, "utf-8");
   const lines = deserialize(text);
