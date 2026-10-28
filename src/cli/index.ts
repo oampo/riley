@@ -21,10 +21,14 @@ import {
   plotterHelp,
   plotterHomeHelp,
   plotterListHelp,
+  plotterMoveHelp,
+  plotterPenDownHelp,
+  plotterPenUpHelp,
+  plotterSleepHelp,
   startHelp,
 } from "./help";
 import { optimize } from "./optimize";
-import { home } from "./plotter";
+import { home, move, penDown, penUp, sleep } from "./plotter";
 
 const argSpec = {
   commands: [
@@ -109,6 +113,77 @@ const argSpec = {
                 },
               ],
               help: plotterHomeHelp,
+            },
+          },
+          {
+            name: "pen-up",
+            spec: {
+              args: [],
+              flags: [
+                {
+                  name: "directory",
+                  type: "string",
+                  alias: "d",
+                  default: "./",
+                },
+              ],
+              help: plotterPenUpHelp,
+            },
+          },
+          {
+            name: "pen-down",
+            spec: {
+              args: [],
+              flags: [
+                {
+                  name: "directory",
+                  type: "string",
+                  alias: "d",
+                  default: "./",
+                },
+              ],
+              help: plotterPenDownHelp,
+            },
+          },
+          {
+            name: "move",
+            spec: {
+              args: [
+                {
+                  name: "x",
+                  type: "number",
+                  required: true,
+                },
+                {
+                  name: "y",
+                  type: "number",
+                  required: true,
+                },
+              ],
+              flags: [
+                {
+                  name: "directory",
+                  type: "string",
+                  alias: "d",
+                  default: "./",
+                },
+              ],
+              help: plotterMoveHelp,
+            },
+          },
+          {
+            name: "sleep",
+            spec: {
+              args: [],
+              flags: [
+                {
+                  name: "directory",
+                  type: "string",
+                  alias: "d",
+                  default: "./",
+                },
+              ],
+              help: plotterSleepHelp,
             },
           },
         ],
@@ -316,6 +391,27 @@ async function main(): Promise<void> {
           case "home": {
             const { directory } = subcommand.flags;
             await home(directory);
+            break;
+          }
+          case "pen-up": {
+            const { directory } = subcommand.flags;
+            await penUp(directory);
+            break;
+          }
+          case "pen-down": {
+            const { directory } = subcommand.flags;
+            await penDown(directory);
+            break;
+          }
+          case "move": {
+            const { directory } = subcommand.flags;
+            const { x, y } = subcommand.args;
+            await move(directory, x, y);
+            break;
+          }
+          case "sleep": {
+            const { directory } = subcommand.flags;
+            await sleep(directory);
             break;
           }
           default:

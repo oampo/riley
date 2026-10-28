@@ -6,9 +6,9 @@ import type { Line } from "../line";
 import type { PlotterConfig, PlotterType } from "./config";
 import { IDrawHPlotterFactory } from "./idraw-h";
 
-export interface PlotterFactory {
+export interface PlotterFactory<C extends PlotterConfig = PlotterConfig> {
   type: PlotterType;
-  create(port: PortInfo): Plotter;
+  create(port: PortInfo, config: C): Plotter;
   match(ports: PortInfo[]): Promise<PlotterInfo[]>;
 }
 
@@ -24,6 +24,9 @@ export interface Plotter {
   disconnect(): Promise<void>;
   plot(lines: Line[]): void;
   home(): Promise<void>;
+  penUp(): Promise<void>;
+  penDown(): Promise<void>;
+  move(x: number, y: number): Promise<void>;
   sleep(): Promise<void>;
 }
 
@@ -39,13 +42,10 @@ export async function listPlotters(): Promise<void> {
   }
 }
 
-export async function getPlotter({
-  type,
-  port,
-  nickname,
-}: Pick<PlotterConfig, "type" | "port" | "nickname">): Promise<
-  Plotter | undefined
-> {
+export async function getPlotter(
+  config: PlotterConfig,
+): Promise<Plotter | undefined> {
+  const { type, port, nickname } = config;
   const ports = await SerialPort.list();
   const factory = checkExists(plotterFactories.find((f) => f.type === type));
   const matches = await factory.match(ports);
@@ -55,7 +55,7 @@ export async function getPlotter({
       (port != null && match.port.path === port) ||
       (nickname !== null && match.nickname == nickname)
     ) {
-      return factory.create(match.port);
+      return factory.create(match.port, config);
     }
   }
 }

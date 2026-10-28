@@ -30,6 +30,10 @@ export type GrblPlotterConfig = {
   acceleration: Vec3; // mm/s^2
   penRaiseVelocity: number; // mm/s
   penLowerVelocity: number; // mm/s
+  penRaiseDelay: number; // ms
+  penLowerDelay: number; // ms
+  penUpHeight: number; // mm
+  penDownHeight: number; // mm
 };
 
 export function grblPlotterConfigDefaults(): GrblPlotterConfig {
@@ -39,6 +43,10 @@ export function grblPlotterConfigDefaults(): GrblPlotterConfig {
     acceleration: vec3(3000, 2000, 3000),
     penRaiseVelocity: 160,
     penLowerVelocity: 160,
+    penUpHeight: 0.5,
+    penDownHeight: 5,
+    penRaiseDelay: 0,
+    penLowerDelay: 0,
   };
 }
 

@@ -16,7 +16,12 @@ interface StringArgument extends BaseArgument {
   readonly default?: string;
 }
 
-type Argument = StringArgument;
+interface NumberArgument extends BaseArgument {
+  readonly type: "number";
+  readonly default?: number;
+}
+
+type Argument = StringArgument | NumberArgument;
 
 interface BaseFlag {
   readonly name: string;
@@ -67,10 +72,18 @@ type StringArgValue<T extends StringArgument | StringFlag> =
       ? string
       : string | undefined;
 
+type NumberArgValue<T extends NumberArgument> = T["required"] extends true
+  ? number
+  : T["default"] extends number
+    ? number
+    : number | undefined;
+
 type ParsedPositionalArgs<T extends readonly Argument[]> = {
   [Key in IndexKeys<T> as Name<T[Key]>]: T[Key] extends StringArgument
     ? StringArgValue<T[Key]>
-    : never;
+    : T[Key] extends NumberArgument
+      ? NumberArgValue<T[Key]>
+      : never;
 };
 
 type ParsedFlagArgs<T extends readonly Flag[]> = {
@@ -110,7 +123,7 @@ type ParsedArgsUnsafe = {
         name: string;
       } & ParsedArgsUnsafe)
     | undefined;
-  args: Record<string, string | undefined>;
+  args: Record<string, string | number | undefined>;
   flags: Record<string, string | boolean | undefined>;
 };
 
@@ -213,7 +226,11 @@ export function parseArgs<T extends InterfaceSpecification>(
         process.exit(1);
       }
 
-      result.args[args[argIndex++].name] = arg;
+      if (args[argIndex].type === "number") {
+        result.args[args[argIndex++].name] = Number(arg);
+      } else {
+        result.args[args[argIndex++].name] = arg;
+      }
     }
   }
 

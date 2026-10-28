@@ -1,20 +1,29 @@
 import type { PortInfo } from "@serialport/bindings-cpp";
 
 import { exists } from "../base";
+import { UnreachableError } from "../base";
 import type { Plotter, PlotterFactory, PlotterInfo } from ".";
-import { PlotterType } from "./config";
+import type { IDrawHPlotterConfig } from "./config";
+import { iDrawHPlotterConfigDefaults, PlotterType } from "./config";
 import { GrblPlotter } from "./grbl-plotter";
 
-export const enum DrawcoreCommands {
+export const enum DrawcoreCommandType {
   QUERY_PAUSE_BUTTON = "$B",
   VERSION = "v",
   QUERY_NICKNAME = "$QT",
 }
 
-export class IDrawHPlotterFactory implements PlotterFactory {
+export type DrawcoreCommand =
+  | {
+      type: DrawcoreCommandType.QUERY_PAUSE_BUTTON;
+    }
+  | { type: DrawcoreCommandType.VERSION }
+  | { type: DrawcoreCommandType.QUERY_NICKNAME };
+
+export class IDrawHPlotterFactory implements PlotterFactory<IDrawHPlotterConfig> {
   readonly type: PlotterType = PlotterType.IDRAW_H;
-  create(port: PortInfo): Plotter {
-    return new IDrawHPlotter(port);
+  create(port: PortInfo, config: IDrawHPlotterConfig): Plotter {
+    return new IDrawHPlotter(port, config);
   }
 
   async match(ports: PortInfo[]): Promise<PlotterInfo[]> {
@@ -25,7 +34,7 @@ export class IDrawHPlotterFactory implements PlotterFactory {
       ) {
         return Promise.resolve(undefined);
       }
-      const plotter = new IDrawHPlotter(port);
+      const plotter = new IDrawHPlotter(port, iDrawHPlotterConfigDefaults());
       await plotter.connect();
       let result: { nickname?: string } | undefined;
       try {
@@ -55,10 +64,10 @@ export class IDrawHPlotterFactory implements PlotterFactory {
 }
 
 class IDrawHPlotter implements Plotter {
-  private readonly plotter: GrblPlotter<DrawcoreCommands>;
+  private readonly plotter: GrblPlotter;
 
-  constructor(portInfo: PortInfo) {
-    this.plotter = new GrblPlotter<DrawcoreCommands>(portInfo);
+  constructor(portInfo: PortInfo, config: IDrawHPlotterConfig) {
+    this.plotter = new GrblPlotter(portInfo, config);
   }
 
   async handshake(): Promise<
@@ -67,20 +76,26 @@ class IDrawHPlotter implements Plotter {
     // Shorter timeout, so we don't have to wait too long to realize its not a
     // valid device
     try {
-      await this.plotter.query(DrawcoreCommands.QUERY_PAUSE_BUTTON, {
-        timeout: 1000,
-      });
+      await this.plotter.query(
+        this.commandString({ type: DrawcoreCommandType.QUERY_PAUSE_BUTTON }),
+        {
+          timeout: 1000,
+        },
+      );
     } catch {
       return;
     }
-    const version = await this.plotter.query(DrawcoreCommands.VERSION, {
-      expectOk: false,
-    });
+    const version = await this.plotter.query(
+      this.commandString({ type: DrawcoreCommandType.VERSION }),
+      {
+        expectOk: false,
+      },
+    );
     if (version == null || !version.startsWith("DrawCore")) {
       return;
     }
     let nickname: string | undefined = await this.plotter.query(
-      DrawcoreCommands.QUERY_NICKNAME,
+      this.commandString({ type: DrawcoreCommandType.QUERY_NICKNAME }),
       {
         optional: true,
       },
@@ -111,7 +126,32 @@ class IDrawHPlotter implements Plotter {
     return this.plotter.home();
   }
 
+  penDown(): Promise<void> {
+    return this.plotter.penDown();
+  }
+
+  penUp(): Promise<void> {
+    return this.plotter.penUp();
+  }
+
+  move(x: number, y: number): Promise<void> {
+    return this.plotter.move(x, y);
+  }
+
   sleep(): Promise<void> {
     return this.plotter.sleep();
+  }
+
+  private commandString(command: DrawcoreCommand): string {
+    switch (command.type) {
+      case DrawcoreCommandType.QUERY_PAUSE_BUTTON:
+        return "$B";
+      case DrawcoreCommandType.VERSION:
+        return "v";
+      case DrawcoreCommandType.QUERY_NICKNAME:
+        return "$QT";
+      default:
+        throw new UnreachableError(command);
+    }
   }
 }

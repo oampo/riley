@@ -76,6 +76,10 @@ export const plotterHelp: CommandHelp = {
   usage: `Usage:
   riley plotter list
   riley plotter home [--directory <dir>]
+  riley plotter pen-up [--directory <dir>]
+  riley plotter pen-down [--directory <dir>]
+  riley plotter move [--directory <dir>] <x> <y>
+  riley plotter sleep [--directory <dir>]
   riley plotter --help
 
 Options:
@@ -103,6 +107,56 @@ export const plotterHomeHelp: CommandHelp = {
 Options:
   --directory The sketch directory 
   --help     Show this help information`,
+};
+
+export const plotterPenUpHelp: CommandHelp = {
+  name: "riley plotter pen-up",
+  description: "Moves the plotter pen up",
+  usage: `Usage:
+  riley plotter pen-up [--directory <dir>]
+  riley plotter pen-up --help
+
+Options:
+  --directory The sketch directory 
+  --help     Show this help information`,
+};
+
+export const plotterPenDownHelp: CommandHelp = {
+  name: "riley plotter pen-down",
+  description: "Moves the plotter pen down",
+  usage: `Usage:
+  riley plotter pen-down [--directory <dir>]
+  riley plotter pen-down --help
+
+Options:
+  --directory The sketch directory 
+  --help      Show this help information`,
+};
+
+export const plotterMoveHelp: CommandHelp = {
+  name: "riley plotter move",
+  description: "Moves the plotter",
+  usage: `Usage:
+  riley plotter move [--directory <dir>] <x> <y>
+  riley plotter move --help
+
+Options:
+  x           The x position to move to
+  y           The y position to move to
+  --directory The sketch directory 
+  --help      Show this help information`,
+};
+
+export const plotterSleepHelp: CommandHelp = {
+  name: "riley plotter sleep",
+  description: "Set the plotter to sleep mode",
+  usage: `Usage:
+  riley plotter sleep [--directory <dir>]
+  riley plotter sleep --help
+
+Options:
+  --directory The sketch directory 
+  --help      Show this help information`,
 };
 
 export const exportHelp: CommandHelp = {

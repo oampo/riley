@@ -2,18 +2,55 @@ import type { PortInfo } from "@serialport/bindings-cpp";
 import { ReadlineParser } from "@serialport/parser-readline";
 import { SerialPort } from "serialport";
 
+import { exists, UnreachableError } from "../base";
 import type { Plotter } from ".";
+import type { GrblPlotterConfig } from "./config";
 
-export const enum GrblCommand {
-  HOME = "$H",
-  SLEEP = "$SLP",
+export enum GrblCommandType {
+  HOME = "home",
+  SLEEP = "sleep",
+  DWELL = "dwell",
+  MOVE = "move",
+  DRAW = "draw",
 }
 
-export class GrblPlotter<ExtCommand extends string> implements Plotter {
+export type GrblCommand =
+  | {
+      type: GrblCommandType.HOME;
+    }
+  | {
+      type: GrblCommandType.SLEEP;
+    }
+  | {
+      type: GrblCommandType.DWELL;
+      timeMs: number;
+    }
+  | {
+      type: GrblCommandType.MOVE;
+      x?: number;
+      y?: number;
+      z?: number;
+      velocityMms?: number;
+    }
+  | {
+      type: GrblCommandType.DRAW;
+      x?: number;
+      y?: number;
+      z?: number;
+      velocityMms?: number;
+    };
+
+const BASE_PEN_DWELL_MS = 50;
+const BASE_MOVE_DWELL_MS = 100;
+
+export class GrblPlotter implements Plotter {
   private readonly port: SerialPort;
   private readonly parser: ReadlineParser;
 
-  constructor(portInfo: PortInfo) {
+  constructor(
+    portInfo: PortInfo,
+    private readonly config: GrblPlotterConfig,
+  ) {
     this.port = new SerialPort({
       path: portInfo.path,
       baudRate: 115200,
@@ -75,20 +112,11 @@ export class GrblPlotter<ExtCommand extends string> implements Plotter {
     return promise;
   }
 
-  private flush(): Promise<void> {
+  private sendCommand(command: GrblCommand | string): Promise<void> {
     const { promise, resolve, reject } = Promise.withResolvers<void>();
-    this.port.flush((e) => {
-      if (e) {
-        return reject(e);
-      }
-      resolve();
-    });
-    return promise;
-  }
-
-  private sendCommand(command: GrblCommand | ExtCommand): Promise<void> {
-    const { promise, resolve, reject } = Promise.withResolvers<void>();
-    this.port.write(`${command}\n`, "ascii", (e) => {
+    const commandString =
+      typeof command === "string" ? command : this.commandString(command);
+    this.port.write(`${commandString}\n`, "ascii", (e) => {
       if (e) {
         return reject(e);
       }
@@ -103,7 +131,7 @@ export class GrblPlotter<ExtCommand extends string> implements Plotter {
   }
 
   async query(
-    command: GrblCommand | ExtCommand,
+    command: GrblCommand | string,
     {
       timeout = 10000,
       expectOk = true,
@@ -136,7 +164,7 @@ export class GrblPlotter<ExtCommand extends string> implements Plotter {
   }
 
   async command(
-    command: GrblCommand | ExtCommand,
+    command: GrblCommand | string,
     {
       timeout = 10000,
       expectOk = true,
@@ -158,10 +186,87 @@ export class GrblPlotter<ExtCommand extends string> implements Plotter {
   plot(): void {}
 
   home(): Promise<void> {
-    return this.command(GrblCommand.HOME);
+    return this.command({ type: GrblCommandType.HOME });
+  }
+
+  async penDown(): Promise<void> {
+    await this.command({
+      type: GrblCommandType.MOVE,
+      z: this.config.penDownHeight,
+      velocityMms: this.config.penLowerVelocity,
+    });
+    await this.dwell(BASE_PEN_DWELL_MS);
+  }
+
+  async penUp(): Promise<void> {
+    await this.command({
+      type: GrblCommandType.MOVE,
+      z: this.config.penUpHeight,
+      velocityMms: this.config.penRaiseVelocity,
+    });
+    await this.dwell(BASE_PEN_DWELL_MS);
+  }
+
+  async move(x: number, y: number): Promise<void> {
+    await this.penUp();
+    await this.command({
+      type: GrblCommandType.MOVE,
+      x,
+      y,
+      velocityMms: this.config.moveVelocity,
+    });
+    await this.dwell(BASE_MOVE_DWELL_MS);
+  }
+
+  dwell(timeMs: number): Promise<void> {
+    return this.command({
+      type: GrblCommandType.DWELL,
+      timeMs,
+    });
   }
 
   sleep(): Promise<void> {
-    return this.command(GrblCommand.SLEEP);
+    return this.command({
+      type: GrblCommandType.SLEEP,
+    });
+  }
+
+  private commandString(command: GrblCommand): string {
+    switch (command.type) {
+      case GrblCommandType.HOME:
+        return "$H";
+      case GrblCommandType.SLEEP:
+        return "$SLP";
+      case GrblCommandType.MOVE:
+        return [
+          "G0",
+          "G90",
+          command.velocityMms != null
+            ? `F${(command.velocityMms * 60).toFixed(0)}`
+            : undefined,
+          command.x != null ? `X${command.x.toFixed(4)}` : undefined,
+          command.y != null ? `Y${(-command.y).toFixed(4)}` : undefined,
+          command.z != null ? `Z${command.z.toFixed(4)}` : undefined,
+        ]
+          .filter(exists)
+          .join(" ");
+      case GrblCommandType.DRAW:
+        return [
+          "G1",
+          "G90",
+          command.velocityMms != null
+            ? `F${(command.velocityMms * 60).toFixed(0)}`
+            : undefined,
+          command.x != null ? `X${command.x.toFixed(4)}` : undefined,
+          command.y != null ? `Y${(-command.y).toFixed(4)}` : undefined,
+          command.z != null ? `Z${command.z.toFixed(4)}` : undefined,
+        ]
+          .filter(exists)
+          .join(" ");
+      case GrblCommandType.DWELL:
+        return `G4 P${(command.timeMs / 1000).toFixed(4)}`;
+      default:
+        throw new UnreachableError(command);
+    }
   }
 }
