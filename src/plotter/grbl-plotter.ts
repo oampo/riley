@@ -3,6 +3,8 @@ import { ReadlineParser } from "@serialport/parser-readline";
 import { SerialPort } from "serialport";
 
 import { exists, UnreachableError } from "../base";
+import type { Queue } from "../data-structures/queue";
+import { queue } from "../data-structures/queue";
 import type { Line } from "../line";
 import type { Plotter } from ".";
 import type { GrblPlotterConfig } from "./config";
@@ -40,7 +42,7 @@ const RX_BUFFER_SIZE = 128;
 export class GrblPlotter implements Plotter {
   private readonly port: SerialPort;
   private readonly parser: ReadlineParser;
-  private readonly responseQueue: string[] = [];
+  private readonly responseQueue: Queue<string> = queue();
   private resolveResponse: ((response: string | undefined) => void) | undefined;
 
   constructor(
@@ -61,7 +63,7 @@ export class GrblPlotter implements Plotter {
         this.resolveResponse = undefined;
         resolve(line);
       } else {
-        this.responseQueue.push(line);
+        this.responseQueue.enqueue(line);
       }
     });
   }
@@ -99,7 +101,7 @@ export class GrblPlotter implements Plotter {
   }: { timeout?: number | undefined } = {}): Promise<string | undefined> {
     // If responses are already waiting in the queue, grab the oldest one immediately
     if (this.responseQueue.length > 0) {
-      return Promise.resolve(this.responseQueue.shift());
+      return Promise.resolve(this.responseQueue.dequeue());
     }
 
     const { promise, resolve } = Promise.withResolvers<string | undefined>();
