@@ -13,7 +13,11 @@ export const help: CommandHelp = {
   riley export <directory>
   riley optimize <file>
   riley plotter list
-  riley plotter [--port <port>] [--nickname <nickname>] home
+  riley plotter [--directory <dir>] home
+  riley plotter [--directory <dir>] pen-up 
+  riley plotter [--directory <dir>] pen-down
+  riley plotter [--directory <dir>] move <x> <y>
+  riley plot [--directory <dir>] <file>
   riley --help
   riley --version
 
@@ -184,6 +188,19 @@ Options:
   --directory The sketch directory
   --outdir    The directory to output optimized JSON
   --help Show this help information`,
+};
+
+export const plotHelp: CommandHelp = {
+  name: "riley plot",
+  description: "Plot a sketch",
+  usage: `Usage:
+  riley plot [--directory <dir>] <file>
+  riley plot --help
+
+Options:
+  file        The JSON file to plot 
+  --directory The sketch directory
+  --help      Show this help information`,
 };
 
 export function printHelp(help: CommandHelp): void {

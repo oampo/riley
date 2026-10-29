@@ -3,6 +3,7 @@ import { ReadlineParser } from "@serialport/parser-readline";
 import { SerialPort } from "serialport";
 
 import { exists, UnreachableError } from "../base";
+import type { Line } from "../line";
 import type { Plotter } from ".";
 import type { GrblPlotterConfig } from "./config";
 
@@ -11,7 +12,6 @@ export enum GrblCommandType {
   SLEEP = "sleep",
   DWELL = "dwell",
   MOVE = "move",
-  DRAW = "draw",
 }
 
 export type GrblCommand =
@@ -31,21 +31,17 @@ export type GrblCommand =
       y?: number;
       z?: number;
       velocityMms?: number;
-    }
-  | {
-      type: GrblCommandType.DRAW;
-      x?: number;
-      y?: number;
-      z?: number;
-      velocityMms?: number;
     };
 
 const BASE_PEN_DWELL_MS = 50;
 const BASE_MOVE_DWELL_MS = 100;
+const RX_BUFFER_SIZE = 128;
 
 export class GrblPlotter implements Plotter {
   private readonly port: SerialPort;
   private readonly parser: ReadlineParser;
+  private readonly responseQueue: string[] = [];
+  private resolveResponse: ((response: string | undefined) => void) | undefined;
 
   constructor(
     portInfo: PortInfo,
@@ -59,6 +55,15 @@ export class GrblPlotter implements Plotter {
     this.parser = this.port.pipe(
       new ReadlineParser({ delimiter: "\r\n", encoding: "ascii" }),
     );
+    this.parser.on("data", (line: string) => {
+      if (this.resolveResponse) {
+        const resolve = this.resolveResponse;
+        this.resolveResponse = undefined;
+        resolve(line);
+      } else {
+        this.responseQueue.push(line);
+      }
+    });
   }
 
   connect(): Promise<void> {
@@ -89,44 +94,61 @@ export class GrblPlotter implements Plotter {
     return promise;
   }
 
-  readline({ timeout = 1000 }: { timeout?: number | undefined } = {}): Promise<
-    string | undefined
-  > {
-    const { promise, resolve } = Promise.withResolvers<string | undefined>();
+  async readline({
+    timeout = 1000,
+  }: { timeout?: number | undefined } = {}): Promise<string | undefined> {
+    // If responses are already waiting in the queue, grab the oldest one immediately
+    if (this.responseQueue.length > 0) {
+      return Promise.resolve(this.responseQueue.shift());
+    }
 
-    this.parser.once("data", (data: string) => {
-      resolve(data);
-      if (timer) {
-        clearTimeout(timer);
-      }
-    });
+    const { promise, resolve } = Promise.withResolvers<string | undefined>();
+    this.resolveResponse = resolve;
 
     let timer: NodeJS.Timeout | undefined;
     if (timeout != null) {
       timer = setTimeout(() => {
-        resolve(undefined);
-        this.parser.off("data", resolve);
+        if (this.resolveResponse === resolve) {
+          this.resolveResponse = undefined;
+          resolve(undefined);
+        }
       }, timeout);
     }
 
-    return promise;
+    const result = await promise;
+    if (timer) {
+      clearTimeout(timer);
+    }
+    return result;
   }
 
-  private sendCommand(command: GrblCommand | string): Promise<void> {
+  private sendCommand(
+    command: GrblCommand | string,
+    { drain = true }: { drain?: boolean } = {},
+  ): Promise<void> {
     const { promise, resolve, reject } = Promise.withResolvers<void>();
     const commandString =
       typeof command === "string" ? command : this.commandString(command);
+
     this.port.write(`${commandString}\n`, "ascii", (e) => {
       if (e) {
         return reject(e);
       }
-    });
-    this.port.drain((e) => {
-      if (e) {
-        return reject(e);
+      // If we aren't draining, resolve immediately after write finishes
+      if (!drain) {
+        resolve();
       }
-      resolve();
     });
+
+    if (drain) {
+      this.port.drain((e) => {
+        if (e) {
+          return reject(e);
+        }
+        resolve();
+      });
+    }
+
     return promise;
   }
 
@@ -183,7 +205,76 @@ export class GrblPlotter implements Plotter {
     }
   }
 
-  plot(): void {}
+  plot(lines: Line[]): Promise<void> {
+    const commands: GrblCommand[] = [];
+    // Home the plotter
+    commands.push({ type: GrblCommandType.HOME });
+    // Set the pen in the pen-up position, and dwell
+    commands.push({
+      type: GrblCommandType.MOVE,
+      z: this.config.penUpHeight,
+      velocityMms: this.config.penRaiseVelocity,
+    });
+    commands.push({
+      type: GrblCommandType.DWELL,
+      timeMs: BASE_PEN_DWELL_MS,
+    });
+    for (const line of lines) {
+      for (const [i, { x, y }] of line.vertices.entries()) {
+        if (i === 0) {
+          // Move to the start point
+          commands.push({
+            type: GrblCommandType.MOVE,
+            x,
+            y,
+            velocityMms: this.config.moveVelocity,
+          });
+          // Place the pen down
+          commands.push({
+            type: GrblCommandType.MOVE,
+            z: this.config.penDownHeight,
+            velocityMms: this.config.penLowerVelocity,
+          });
+          commands.push({
+            type: GrblCommandType.DWELL,
+            timeMs: BASE_PEN_DWELL_MS + this.config.penLowerDelay,
+          });
+          continue;
+        }
+
+        commands.push({
+          type: GrblCommandType.MOVE,
+          x,
+          y,
+          // Only need to send velocity on the first draw step, then it'll be inherited
+          velocityMms: i === 1 ? this.config.moveVelocity : undefined,
+        });
+      }
+      // Lift the pen up
+      commands.push({
+        type: GrblCommandType.MOVE,
+        z: this.config.penUpHeight,
+        velocityMms: this.config.penRaiseVelocity,
+      });
+      commands.push({
+        type: GrblCommandType.DWELL,
+        timeMs: BASE_PEN_DWELL_MS + this.config.penRaiseDelay,
+      });
+    }
+    // Move back to 0, 0
+    commands.push({
+      type: GrblCommandType.MOVE,
+      x: 0,
+      y: 0,
+      velocityMms: this.config.moveVelocity,
+    });
+    commands.push({
+      type: GrblCommandType.DWELL,
+      timeMs: BASE_MOVE_DWELL_MS,
+    });
+    commands.push({ type: GrblCommandType.SLEEP });
+    return this.stream(commands);
+  }
 
   home(): Promise<void> {
     return this.command({ type: GrblCommandType.HOME });
@@ -239,19 +330,6 @@ export class GrblPlotter implements Plotter {
         return "$SLP";
       case GrblCommandType.MOVE:
         return [
-          "G0",
-          "G90",
-          command.velocityMms != null
-            ? `F${(command.velocityMms * 60).toFixed(0)}`
-            : undefined,
-          command.x != null ? `X${command.x.toFixed(4)}` : undefined,
-          command.y != null ? `Y${(-command.y).toFixed(4)}` : undefined,
-          command.z != null ? `Z${command.z.toFixed(4)}` : undefined,
-        ]
-          .filter(exists)
-          .join(" ");
-      case GrblCommandType.DRAW:
-        return [
           "G1",
           "G90",
           command.velocityMms != null
@@ -267,6 +345,50 @@ export class GrblPlotter implements Plotter {
         return `G4 P${(command.timeMs / 1000).toFixed(4)}`;
       default:
         throw new UnreachableError(command);
+    }
+  }
+
+  private async stream(
+    commands: GrblCommand[],
+    { timeout = 10000 }: { timeout?: number | undefined } = {},
+  ): Promise<void> {
+    const pendingLengths: number[] = [];
+    let currentBufferBytes = 0;
+
+    for (const command of commands) {
+      const commandString = this.commandString(command);
+      const commandLength = commandString.length + 1; // Account for the newline character '\n'
+
+      while (currentBufferBytes + commandLength >= RX_BUFFER_SIZE - 1) {
+        const response = await this.readline({ timeout });
+        if (response == null) {
+          throw new Error("Streaming timed out waiting for response");
+        }
+        if (response === "ok" || response.startsWith("error")) {
+          const freed = pendingLengths.shift();
+          if (freed != null) {
+            currentBufferBytes -= freed;
+          }
+        }
+      }
+
+      await this.sendCommand(commandString, { drain: false });
+      pendingLengths.push(commandLength);
+      currentBufferBytes += commandLength;
+    }
+
+    // Drain Phase: Wait for all remaining buffered commands to finish executing
+    while (pendingLengths.length > 0) {
+      const response = await this.readline({ timeout });
+      if (response == null) {
+        throw new Error("Streaming timed out waiting for response");
+      }
+      if (response === "ok" || response.startsWith("error")) {
+        const freed = pendingLengths.shift();
+        if (freed != null) {
+          currentBufferBytes -= freed;
+        }
+      }
     }
   }
 }

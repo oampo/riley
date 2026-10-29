@@ -10,7 +10,7 @@ interface Margin {
   left: number;
 }
 
-type WithMarginCallback = ({ size }: { size: Vec2 }) => [Line];
+type WithMarginCallback = ({ size }: { size: Vec2 }) => Line[];
 
 export function withMargin(
   size: Vec2,

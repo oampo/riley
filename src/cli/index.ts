@@ -18,6 +18,7 @@ import {
   exportHelp,
   help,
   optimizeHelp,
+  plotHelp,
   plotterHelp,
   plotterHomeHelp,
   plotterListHelp,
@@ -28,7 +29,7 @@ import {
   startHelp,
 } from "./help";
 import { optimize } from "./optimize";
-import { home, move, penDown, penUp, sleep } from "./plotter";
+import { home, move, penDown, penUp, plot, sleep } from "./plotter";
 
 const argSpec = {
   commands: [
@@ -238,6 +239,27 @@ const argSpec = {
         help: optimizeHelp,
       },
     },
+    {
+      name: "plot",
+      spec: {
+        args: [
+          {
+            name: "file",
+            type: "string",
+            required: true,
+          },
+        ] as const,
+        flags: [
+          {
+            name: "directory",
+            type: "string",
+            alias: "d",
+            default: "./",
+          },
+        ] as const,
+        help: plotHelp,
+      },
+    },
   ] as const,
   help: help,
   version: VERSION,
@@ -427,6 +449,11 @@ async function main(): Promise<void> {
       case "optimize": {
         const { args, flags } = command;
         await optimize(args.file, flags.directory, flags.outdir);
+        break;
+      }
+      case "plot": {
+        const { args, flags } = command;
+        await plot(args.file, flags.directory);
         break;
       }
       default:

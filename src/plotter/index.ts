@@ -22,7 +22,7 @@ const plotterFactories: PlotterFactory[] = [new IDrawHPlotterFactory()];
 export interface Plotter {
   connect(): Promise<void>;
   disconnect(): Promise<void>;
-  plot(lines: Line[]): void;
+  plot(lines: Line[]): Promise<void>;
   home(): Promise<void>;
   penUp(): Promise<void>;
   penDown(): Promise<void>;

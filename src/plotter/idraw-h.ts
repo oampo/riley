@@ -2,6 +2,7 @@ import type { PortInfo } from "@serialport/bindings-cpp";
 
 import { exists } from "../base";
 import { UnreachableError } from "../base";
+import type { Line } from "../line";
 import type { Plotter, PlotterFactory, PlotterInfo } from ".";
 import type { IDrawHPlotterConfig } from "./config";
 import { iDrawHPlotterConfigDefaults, PlotterType } from "./config";
@@ -118,8 +119,8 @@ class IDrawHPlotter implements Plotter {
     return this.plotter.disconnect();
   }
 
-  plot(): void {
-    this.plotter.plot();
+  plot(lines: Line[]): Promise<void> {
+    return this.plotter.plot(lines);
   }
 
   home(): Promise<void> {
