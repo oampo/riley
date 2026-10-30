@@ -1,39 +1,32 @@
-import type { Geometry, Polygon, Position } from "martinez-polygon-clipping";
-import * as martinez from "martinez-polygon-clipping";
+import * as clipper from "clipper2-ts";
 
+import { vertices } from "./attribute";
 import type { Line } from "./line";
 import { vec2 } from "./math";
 
-type MartinezFn = (subject: Geometry, clipping: Geometry) => Geometry;
-
-function lineToPolygon(l: Line): Polygon {
-  const { vertices } = l;
-  return [vertices.map((vertex) => [vertex.x, vertex.y])];
-}
-
-function wrapMartinez(martinezFn: MartinezFn) {
-  return function (polygonA: Line, polygonB: Line): Line[] {
-    const result = martinezFn(lineToPolygon(polygonA), lineToPolygon(polygonB));
-
-    return result.map((x) => {
-      if (!x.length) {
-        return {
-          ...polygonA,
-          vertices: [],
-        };
-      }
-      return {
-        ...polygonA,
-        vertices: x[0].map((vertex: number | Position) => {
-          if (!Array.isArray(vertex)) throw new Error("Expected array");
-          return vec2(vertex[0], vertex[1]);
-        }),
-      };
-    });
+function wrapClipper(
+  fn: (
+    subject: clipper.Paths64,
+    clip: clipper.Paths64,
+    fillRule: clipper.FillRule,
+  ) => clipper.Paths64,
+): (lineA: Line, lineB: Line) => Line[] {
+  return (lineA, lineB) => {
+    const result = fn(
+      [vertices(lineA)],
+      [vertices(lineB)],
+      clipper.FillRule.NonZero,
+    );
+    return result.map((p) =>
+      vertices(
+        lineA,
+        p.map(({ x, y }) => vec2(x, y)),
+      ),
+    );
   };
 }
 
-export const intersection = wrapMartinez(martinez.intersection);
-export const union = wrapMartinez(martinez.union);
-export const diff = wrapMartinez(martinez.diff);
-export const xor = wrapMartinez(martinez.xor);
+export const intersection = wrapClipper(clipper.intersect);
+export const union = wrapClipper(clipper.union);
+export const diff = wrapClipper(clipper.difference);
+export const xor = wrapClipper(clipper.xor);

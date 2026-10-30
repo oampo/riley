@@ -5,6 +5,7 @@ import type { Line } from "./line";
 import { line } from "./line";
 import type { Vec2 } from "./math";
 import { vec2 } from "./math";
+import { offset } from "./offset";
 import type { SpatialHash } from "./spatial-hash";
 import { rotate, translate } from "./transform";
 
@@ -27,13 +28,13 @@ function getSpacingFn(spacing: HatchSpacing): SpacingFn {
   }
 }
 
-interface HatchOptions {
+type HatchOpts = {
   angle?: number;
   spacing?: HatchSpacing;
   render?: (start: Vec2, end: Vec2) => Line;
   alternate?: boolean;
   polygonHash?: SpatialHash<number>;
-}
+};
 
 export function hatch(
   polygon: Line,
@@ -43,7 +44,7 @@ export function hatch(
     render = (start, end): Line => line(start, end),
     alternate = true,
     polygonHash,
-  }: HatchOptions = {},
+  }: HatchOpts = {},
 ): Line[] {
   // Approach: render a hatched square the size of the largest page dimension,
   // then clip the box to the polygon
@@ -55,7 +56,6 @@ export function hatch(
   const lines = [];
   let width = 0;
   let i = 0;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const start = vec2(width, 0);
     const end = vec2(width, squareSize);
@@ -84,4 +84,25 @@ export function hatch(
   });
 
   return clipped;
+}
+
+type ContourHatchOpts = {
+  spacing?: number;
+};
+
+export function contourHatch(
+  polygon: Line,
+  { spacing = getConfig().defaultWeight * 2 }: ContourHatchOpts = {},
+): Line[] {
+  let delta = spacing;
+  const lines = [];
+  while (true) {
+    const o = offset(polygon, -delta);
+    lines.push(...o);
+    if (!o.length) {
+      break;
+    }
+    delta += spacing;
+  }
+  return lines;
 }

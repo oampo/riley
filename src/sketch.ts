@@ -130,7 +130,6 @@ class SketchImpl<T> implements Sketch {
     let lines: Line[] | undefined;
     if (animatedListeners) {
       this.state = animatedListeners.setup({ config });
-      // eslint-disable-next-line no-constant-condition
       while (true) {
         const newState = animatedListeners.update({
           config,

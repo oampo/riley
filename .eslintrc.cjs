@@ -18,6 +18,12 @@ module.exports = {
     tsconfigRootDir: __dirname,
   },
   rules: {
+    "no-constant-condition": [
+      "error",
+      {
+        checkLoops: false,
+      },
+    ],
     "@typescript-eslint/no-unused-vars": [
       "error",
       {

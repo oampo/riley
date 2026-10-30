@@ -14,7 +14,7 @@ export {
   polygonContainsPoint,
   segmentIntersectsSegment,
 } from "./geometry";
-export { hatch } from "./hatch";
+export { contourHatch, hatch } from "./hatch";
 export type { Line } from "./line";
 export { line } from "./line";
 export { subdivide } from "./line-ops";
@@ -32,6 +32,7 @@ export {
   vec4,
 } from "./math";
 export { perlin } from "./noise";
+export { offset } from "./offset";
 export type { PlotterConfig } from "./plotter/config";
 export { PlotterType } from "./plotter/config";
 export { diff, intersection, union, xor } from "./polygon-ops";
