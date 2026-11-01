@@ -206,6 +206,34 @@ class SketchImpl<T> implements Sketch {
 
       for (const line of lines) {
         const { vertices } = line;
+        if (vertices.length === 1) {
+          const element = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "circle",
+          );
+          element.setAttribute(
+            "cx",
+            optimize ? `${vertices[0].x.toFixed(3)}` : `${vertices[0].x}`,
+          );
+          element.setAttribute(
+            "cy",
+            optimize ? `${vertices[0].y.toFixed(3)}` : `${vertices[0].y}`,
+          );
+          element.setAttribute(
+            "r",
+            optimize
+              ? (weight(line) / 2).toFixed(3)
+              : (weight(line) / 2).toString(),
+          );
+          element.setAttribute("fill", `#${rgbHex(color(line))}`);
+          element.setAttribute(
+            "opacity",
+            optimize ? alpha(line).toFixed(3) : alpha(line).toString(),
+          );
+
+          layer.appendChild(element);
+          continue;
+        }
         const element = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "polyline",
