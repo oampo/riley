@@ -164,7 +164,7 @@ class SketchImpl<T> implements Sketch {
     return checkExists(lines);
   }
 
-  private renderLines(lines: Line[], optimize = false): void {
+  private renderLines(lines: Line[]): void {
     const svg = checkExists(this.svg);
     if (!lines.length) {
       svg.replaceChildren();
@@ -211,25 +211,11 @@ class SketchImpl<T> implements Sketch {
             "http://www.w3.org/2000/svg",
             "circle",
           );
-          element.setAttribute(
-            "cx",
-            optimize ? `${vertices[0].x.toFixed(3)}` : `${vertices[0].x}`,
-          );
-          element.setAttribute(
-            "cy",
-            optimize ? `${vertices[0].y.toFixed(3)}` : `${vertices[0].y}`,
-          );
-          element.setAttribute(
-            "r",
-            optimize
-              ? (weight(line) / 2).toFixed(3)
-              : (weight(line) / 2).toString(),
-          );
+          element.setAttribute("cx", `${vertices[0].x}`);
+          element.setAttribute("cy", `${vertices[0].y}`);
+          element.setAttribute("r", (weight(line) / 2).toString());
           element.setAttribute("fill", `#${rgbHex(color(line))}`);
-          element.setAttribute(
-            "opacity",
-            optimize ? alpha(line).toFixed(3) : alpha(line).toString(),
-          );
+          element.setAttribute("opacity", alpha(line).toString());
 
           layer.appendChild(element);
           continue;
@@ -239,23 +225,13 @@ class SketchImpl<T> implements Sketch {
           "polyline",
         );
         const points = vertices
-          .map((vertex: Vec2) =>
-            optimize
-              ? `${vertex.x.toFixed(3)},${vertex.y.toFixed(3)}`
-              : `${vertex.x},${vertex.y}`,
-          )
+          .map((vertex: Vec2) => `${vertex.x},${vertex.y}`)
           .join(" ");
         element.setAttribute("points", points);
         element.setAttribute("fill", "none");
         element.setAttribute("stroke", `#${rgbHex(color(line))}`);
-        element.setAttribute(
-          "stroke-opacity",
-          optimize ? alpha(line).toFixed(3) : alpha(line).toString(),
-        );
-        element.setAttribute(
-          "stroke-width",
-          optimize ? weight(line).toFixed(3) : weight(line).toString(),
-        );
+        element.setAttribute("stroke-opacity", alpha(line).toString());
+        element.setAttribute("stroke-width", weight(line).toString());
         element.setAttribute("stroke-linecap", "round");
 
         layer.appendChild(element);

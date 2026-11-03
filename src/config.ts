@@ -45,6 +45,7 @@ export type PartialConfig = Partial<
 
 type OptimizationConfig = {
   readonly mergeThreshold: number;
+  readonly precision: number;
 };
 
 export type Config = Omit<ConfigOpts, "paper"> & {
@@ -63,7 +64,8 @@ class ConfigImpl implements Config {
   seed: number | string = randomId();
   optimization: {
     mergeThreshold: number;
-  } = { mergeThreshold: 1 };
+    precision: number;
+  } = { mergeThreshold: 1, precision: 3 };
   plotter: PlotterConfig | undefined;
 
   private constructor() {}

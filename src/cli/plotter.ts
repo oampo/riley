@@ -13,7 +13,7 @@ export async function home(sketchDir: string): Promise<void> {
     "No plotter configured",
   );
   const plotter = checkExists(
-    await getPlotter(plotterConfig),
+    await getPlotter(plotterConfig, sketch.config),
     "Could not find plotter",
   );
   await plotter.connect();
@@ -28,7 +28,7 @@ export async function penUp(sketchDir: string): Promise<void> {
     "No plotter configured",
   );
   const plotter = checkExists(
-    await getPlotter(plotterConfig),
+    await getPlotter(plotterConfig, sketch.config),
     "Could not find plotter",
   );
   await plotter.connect();
@@ -43,7 +43,7 @@ export async function penDown(sketchDir: string): Promise<void> {
     "No plotter configured",
   );
   const plotter = checkExists(
-    await getPlotter(plotterConfig),
+    await getPlotter(plotterConfig, sketch.config),
     "Could not find plotter",
   );
   await plotter.connect();
@@ -62,7 +62,7 @@ export async function move(
     "No plotter configured",
   );
   const plotter = checkExists(
-    await getPlotter(plotterConfig),
+    await getPlotter(plotterConfig, sketch.config),
     "Could not find plotter",
   );
   await plotter.connect();
@@ -78,7 +78,7 @@ export async function sleep(sketchDir: string): Promise<void> {
     "No plotter configured",
   );
   const plotter = checkExists(
-    await getPlotter(plotterConfig),
+    await getPlotter(plotterConfig, sketch.config),
     "Could not find plotter",
   );
   await plotter.connect();
@@ -102,7 +102,7 @@ export async function plot(filePath: string, sketchDir: string): Promise<void> {
     "No plotter configured",
   );
   const plotter = checkExists(
-    await getPlotter(plotterConfig),
+    await getPlotter(plotterConfig, sketch.config),
     "Could not find plotter",
   );
   await plotter.connect();

@@ -2,13 +2,18 @@ import type { PortInfo } from "@serialport/bindings-cpp";
 import { SerialPort } from "serialport";
 
 import { checkExists, exists } from "../base";
+import type { Config } from "../config";
 import type { Line } from "../line";
 import type { PlotterConfig, PlotterType } from "./config";
 import { IDrawHPlotterFactory } from "./idraw-h";
 
 export interface PlotterFactory<C extends PlotterConfig = PlotterConfig> {
   type: PlotterType;
-  create(port: PortInfo, config: C): Plotter;
+  create(
+    port: PortInfo,
+    config: C,
+    sketchConfig: Omit<Config, "plotter">,
+  ): Plotter;
   match(ports: PortInfo[]): Promise<PlotterInfo[]>;
 }
 
@@ -44,6 +49,7 @@ export async function listPlotters(): Promise<void> {
 
 export async function getPlotter(
   config: PlotterConfig,
+  sketchConfig: Omit<Config, "plotter">,
 ): Promise<Plotter | undefined> {
   const { type, port, nickname } = config;
   const ports = await SerialPort.list();
@@ -55,7 +61,7 @@ export async function getPlotter(
       (port != null && match.port.path === port) ||
       (nickname !== null && match.nickname == nickname)
     ) {
-      return factory.create(match.port, config);
+      return factory.create(match.port, config, sketchConfig);
     }
   }
 }

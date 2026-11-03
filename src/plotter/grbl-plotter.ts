@@ -3,6 +3,7 @@ import { ReadlineParser } from "@serialport/parser-readline";
 import { SerialPort } from "serialport";
 
 import { exists, UnreachableError } from "../base";
+import type { Config } from "../config";
 import type { Queue } from "../data-structures/queue";
 import { queue } from "../data-structures/queue";
 import type { Line } from "../line";
@@ -48,6 +49,7 @@ export class GrblPlotter implements Plotter {
   constructor(
     portInfo: PortInfo,
     private readonly config: GrblPlotterConfig,
+    private readonly sketchConfig: Omit<Config, "plotter">,
   ) {
     this.port = new SerialPort({
       path: portInfo.path,
@@ -325,6 +327,7 @@ export class GrblPlotter implements Plotter {
   }
 
   private commandString(command: GrblCommand): string {
+    const { precision } = this.sketchConfig.optimization;
     switch (command.type) {
       case GrblCommandType.HOME:
         return "$H";
@@ -337,14 +340,14 @@ export class GrblPlotter implements Plotter {
           command.velocityMms != null
             ? `F${(command.velocityMms * 60).toFixed(0)}`
             : undefined,
-          command.x != null ? `X${command.x.toFixed(4)}` : undefined,
-          command.y != null ? `Y${(-command.y).toFixed(4)}` : undefined,
-          command.z != null ? `Z${command.z.toFixed(4)}` : undefined,
+          command.x != null ? `X${command.x.toFixed(precision)}` : undefined,
+          command.y != null ? `Y${(-command.y).toFixed(precision)}` : undefined,
+          command.z != null ? `Z${command.z.toFixed(precision)}` : undefined,
         ]
           .filter(exists)
           .join(" ");
       case GrblCommandType.DWELL:
-        return `G4 P${(command.timeMs / 1000).toFixed(4)}`;
+        return `G4 P${(command.timeMs / 1000).toFixed(precision)}`;
       default:
         throw new UnreachableError(command);
     }

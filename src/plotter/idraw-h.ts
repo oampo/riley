@@ -2,6 +2,8 @@ import type { PortInfo } from "@serialport/bindings-cpp";
 
 import { exists } from "../base";
 import { UnreachableError } from "../base";
+import type { Config } from "../config";
+import { getConfig } from "../config";
 import type { Line } from "../line";
 import type { Plotter, PlotterFactory, PlotterInfo } from ".";
 import type { IDrawHPlotterConfig } from "./config";
@@ -23,8 +25,12 @@ export type DrawcoreCommand =
 
 export class IDrawHPlotterFactory implements PlotterFactory<IDrawHPlotterConfig> {
   readonly type: PlotterType = PlotterType.IDRAW_H;
-  create(port: PortInfo, config: IDrawHPlotterConfig): Plotter {
-    return new IDrawHPlotter(port, config);
+  create(
+    port: PortInfo,
+    config: IDrawHPlotterConfig,
+    sketchConfig: Omit<Config, "plotter">,
+  ): Plotter {
+    return new IDrawHPlotter(port, config, sketchConfig);
   }
 
   async match(ports: PortInfo[]): Promise<PlotterInfo[]> {
@@ -35,7 +41,11 @@ export class IDrawHPlotterFactory implements PlotterFactory<IDrawHPlotterConfig>
       ) {
         return Promise.resolve(undefined);
       }
-      const plotter = new IDrawHPlotter(port, iDrawHPlotterConfigDefaults());
+      const plotter = new IDrawHPlotter(
+        port,
+        iDrawHPlotterConfigDefaults(),
+        getConfig(),
+      );
       await plotter.connect();
       let result: { nickname?: string } | undefined;
       try {
@@ -67,8 +77,12 @@ export class IDrawHPlotterFactory implements PlotterFactory<IDrawHPlotterConfig>
 class IDrawHPlotter implements Plotter {
   private readonly plotter: GrblPlotter;
 
-  constructor(portInfo: PortInfo, config: IDrawHPlotterConfig) {
-    this.plotter = new GrblPlotter(portInfo, config);
+  constructor(
+    portInfo: PortInfo,
+    config: IDrawHPlotterConfig,
+    sketchConfig: Omit<Config, "plotter">,
+  ) {
+    this.plotter = new GrblPlotter(portInfo, config, sketchConfig);
   }
 
   async handshake(): Promise<
