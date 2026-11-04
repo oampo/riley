@@ -25,8 +25,8 @@ export type PaperOrientation = "portrait" | "landscape";
 export type ConfigOpts = {
   readonly paperSize: PaperSize;
   readonly paperOrientation: PaperOrientation;
-  readonly defaultColor: RgbaColor;
-  readonly defaultWeight: number;
+  readonly defaultPen: number;
+  readonly defaultColor: number;
   readonly backgroundColor: RgbaColor;
   readonly timestep: number;
   readonly defaultResolution: number;
@@ -34,6 +34,7 @@ export type ConfigOpts = {
   readonly seed: number | string;
   readonly optimization: OptimizationConfig;
   readonly plotter: PlotterConfig | undefined;
+  readonly pens: Pen[];
 };
 
 export type PartialConfig = Partial<
@@ -48,6 +49,11 @@ type OptimizationConfig = {
   readonly precision: number;
 };
 
+export type Pen = {
+  readonly colors: RgbaColor[];
+  readonly thickness: number;
+};
+
 export type Config = Omit<ConfigOpts, "paper"> & {
   readonly size: Vec2;
 };
@@ -55,8 +61,8 @@ export type Config = Omit<ConfigOpts, "paper"> & {
 class ConfigImpl implements Config {
   paperSize: PaperSize = "A3";
   paperOrientation: PaperOrientation = "portrait";
-  defaultColor: RgbaColor = rgb(0, 0, 0);
-  defaultWeight: number = 1;
+  defaultPen: number = 0;
+  defaultColor: number = 0;
   backgroundColor: RgbaColor = rgb(1, 1, 1);
   timestep: number = 1 / 60;
   defaultResolution: number = 2;
@@ -67,6 +73,12 @@ class ConfigImpl implements Config {
     precision: number;
   } = { mergeThreshold: 1, precision: 3 };
   plotter: PlotterConfig | undefined;
+  pens: Pen[] = [
+    {
+      colors: [rgb(0, 0, 0)],
+      thickness: 1,
+    },
+  ];
 
   private constructor() {}
 
@@ -86,8 +98,7 @@ class ConfigImpl implements Config {
     }
     if (config.paperOrientation != null)
       this.paperOrientation = config.paperOrientation;
-    if (config.defaultColor != null) this.defaultColor = config.defaultColor;
-    if (config.defaultWeight != null) this.defaultWeight = config.defaultWeight;
+    if (config.defaultPen != null) this.defaultPen = config.defaultPen;
     if (config.backgroundColor != null)
       this.backgroundColor = config.backgroundColor;
     if (config.timestep != null) this.timestep = config.timestep;
@@ -95,6 +106,7 @@ class ConfigImpl implements Config {
       this.defaultResolution = config.defaultResolution;
     if (config.epsilon != null) this.epsilon = config.epsilon;
     if (config.seed != null) this.seed = config.seed;
+    if (config.pens != null) this.pens = config.pens;
     if (config.optimization != null) {
       this.optimization = {
         ...this.optimization,

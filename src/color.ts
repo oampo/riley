@@ -1,4 +1,3 @@
-import type { Line } from "./line";
 import type { Vec4 } from "./math";
 import { vec4 } from "./math";
 
@@ -95,69 +94,4 @@ export function rgbHex(x: RgbaColor): string {
       .toString(16)
       .padStart(2, "0")
   );
-}
-
-export function color(line: Line): RgbaColor;
-export function color(line: Line, color: RgbaColor): Line;
-export function color(line: Line, color?: RgbaColor): RgbaColor | Line {
-  if (!color) {
-    return line.color;
-  }
-
-  return {
-    ...line,
-    color,
-  };
-}
-
-export function red(line: Line): number;
-export function red(line: Line, value: number): Line;
-export function red(line: Line, value?: number): number | Line {
-  if (value == null) {
-    return line.color.r;
-  }
-
-  return {
-    ...line,
-    color: line.color.withR(value),
-  };
-}
-
-export function green(line: Line): number;
-export function green(line: Line, value: number): Line;
-export function green(line: Line, value?: number): number | Line {
-  if (value == null) {
-    return line.color.g;
-  }
-
-  return {
-    ...line,
-    color: line.color.withG(value),
-  };
-}
-
-export function blue(line: Line): number;
-export function blue(line: Line, value: number): Line;
-export function blue(line: Line, value?: number): number | Line {
-  if (value == null) {
-    return line.color.b;
-  }
-
-  return {
-    ...line,
-    color: line.color.withB(value),
-  };
-}
-
-export function alpha(line: Line): number;
-export function alpha(line: Line, value: number): Line;
-export function alpha(line: Line, value?: number): number | Line {
-  if (value == null) {
-    return line.color.a;
-  }
-
-  return {
-    ...line,
-    color: line.color.withA(value),
-  };
 }

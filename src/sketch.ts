@@ -1,6 +1,6 @@
-import { layer, weight } from "./attribute";
+import { layer } from "./attribute";
 import { checkExists } from "./base";
-import { alpha, color, rgbaHex, rgbHex } from "./color";
+import { rgbaHex, rgbHex } from "./color";
 import type { Config, PartialConfig } from "./config";
 import { getConfig, setConfig } from "./config";
 import type { Line } from "./line";
@@ -205,7 +205,9 @@ class SketchImpl<T> implements Sketch {
       );
 
       for (const line of lines) {
-        const { vertices } = line;
+        const { vertices, pen: penIndex, color: colorIndex } = line;
+        const pen = this.config.pens[penIndex];
+        const color = pen.colors[colorIndex];
         if (vertices.length === 1) {
           const element = document.createElementNS(
             "http://www.w3.org/2000/svg",
@@ -213,9 +215,9 @@ class SketchImpl<T> implements Sketch {
           );
           element.setAttribute("cx", `${vertices[0].x}`);
           element.setAttribute("cy", `${vertices[0].y}`);
-          element.setAttribute("r", (weight(line) / 2).toString());
-          element.setAttribute("fill", `#${rgbHex(color(line))}`);
-          element.setAttribute("opacity", alpha(line).toString());
+          element.setAttribute("r", (pen.thickness / 2).toString());
+          element.setAttribute("fill", `#${rgbHex(color)}`);
+          element.setAttribute("opacity", color.a.toString());
 
           layer.appendChild(element);
           continue;
@@ -229,9 +231,9 @@ class SketchImpl<T> implements Sketch {
           .join(" ");
         element.setAttribute("points", points);
         element.setAttribute("fill", "none");
-        element.setAttribute("stroke", `#${rgbHex(color(line))}`);
-        element.setAttribute("stroke-opacity", alpha(line).toString());
-        element.setAttribute("stroke-width", weight(line).toString());
+        element.setAttribute("stroke", `#${rgbHex(color)}`);
+        element.setAttribute("stroke-opacity", color.a.toString());
+        element.setAttribute("stroke-width", pen.thickness.toString());
         element.setAttribute("stroke-linecap", "round");
 
         layer.appendChild(element);

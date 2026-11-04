@@ -1,3 +1,4 @@
+import { checkExists } from "./base";
 import { clip } from "./clip-mask";
 import { getConfig } from "./config";
 import { boundingBox } from "./geometry";
@@ -40,7 +41,8 @@ export function hatch(
   polygon: Line,
   {
     angle = 0,
-    spacing = getConfig().defaultWeight * 2,
+    spacing = checkExists(getConfig().pens.at(getConfig().defaultPen))
+      .thickness * 2,
     render = (start, end): Line => line(start, end),
     alternate = true,
     polygonHash,
@@ -92,7 +94,10 @@ type ContourHatchOpts = {
 
 export function contourHatch(
   polygon: Line,
-  { spacing = getConfig().defaultWeight * 2 }: ContourHatchOpts = {},
+  {
+    spacing = checkExists(getConfig().pens.at(getConfig().defaultPen))
+      .thickness * 2,
+  }: ContourHatchOpts = {},
 ): Line[] {
   let delta = spacing;
   const lines = [];

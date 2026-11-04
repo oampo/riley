@@ -1,13 +1,14 @@
 export {
+  color,
   layer,
   mapVertices,
+  pen,
   pushVertices,
   vertices,
-  weight,
 } from "./attribute";
 export { clip, mask } from "./clip-mask";
 export type { RgbaColor } from "./color";
-export { alpha, blue, color, green, red, rgb, rgba } from "./color";
+export { rgb, rgba } from "./color";
 export type { Config } from "./config";
 export {
   lineIntersectsLine,
