@@ -1,6 +1,8 @@
 import RBush from "rbush";
 import knn from "rbush-knn";
 
+import { color, layer, pen } from "./attribute";
+import type { OptimizationConfig } from "./config";
 import { getConfig } from "./config";
 import type { Line } from "./line";
 
@@ -12,6 +14,48 @@ interface RTreeNode {
   index: number;
   isEnd: boolean;
   partner?: RTreeNode;
+}
+
+export function sort(
+  lines: Line[],
+  { sortPens, sortColors }: Pick<OptimizationConfig, "sortPens" | "sortColors">,
+): Line[] {
+  return lines.toSorted((a, b) => {
+    if (layer(a) !== layer(b)) {
+      return layer(a) - layer(b);
+    }
+    if (sortPens && pen(a) !== pen(b)) {
+      return pen(a) - pen(b);
+    }
+    if (sortColors && color(a) !== color(b)) {
+      return color(a) - color(b);
+    }
+    return 0;
+  });
+}
+
+export function group(lines: Line[]): Line[][] {
+  if (lines.length === 0) {
+    return [];
+  }
+  let currentGroup = [lines[0]];
+  const groups = [currentGroup];
+  for (let i = 1; i < lines.length; i++) {
+    const curr = lines[i];
+    const prev = currentGroup[currentGroup.length - 1];
+    if (
+      layer(curr) !== layer(prev) ||
+      pen(curr) !== pen(prev) ||
+      color(curr) !== color(prev)
+    ) {
+      const newGroup = [curr];
+      groups.push(newGroup);
+      currentGroup = newGroup;
+    } else {
+      currentGroup.push(curr);
+    }
+  }
+  return groups;
 }
 
 export function spatialSort(lines: Line[]): Line[] {

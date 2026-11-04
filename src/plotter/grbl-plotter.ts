@@ -1,3 +1,6 @@
+import { stdin, stdout } from "node:process";
+import readline from "node:readline/promises";
+
 import type { PortInfo } from "@serialport/bindings-cpp";
 import { ReadlineParser } from "@serialport/parser-readline";
 import { SerialPort } from "serialport";
@@ -8,6 +11,8 @@ import type { Queue } from "../data-structures/queue";
 import { queue } from "../data-structures/queue";
 import type { Line } from "../line";
 import type { Plotter } from ".";
+import type { PlotterCommand } from "./command";
+import { PlotterCommandType } from "./command";
 import type { GrblPlotterConfig } from "./config";
 
 export enum GrblCommandType {
@@ -209,8 +214,8 @@ export class GrblPlotter implements Plotter {
     }
   }
 
-  plot(lines: Line[]): Promise<void> {
-    const commands: GrblCommand[] = [];
+  async plot(lines: Line[]): Promise<void> {
+    let commands: GrblCommand[] = [];
     // Home the plotter
     commands.push({ type: GrblCommandType.HOME });
     // Set the pen in the pen-up position, and dwell
@@ -223,8 +228,43 @@ export class GrblPlotter implements Plotter {
       type: GrblCommandType.DWELL,
       timeMs: BASE_PEN_DWELL_MS,
     });
+    let currentPen: number | undefined;
+    let currentColor: number | undefined;
     for (const line of lines) {
-      for (const [i, { x, y }] of line.vertices.entries()) {
+      const { vertices, pen, color } = line;
+      if (currentPen != null && pen !== currentPen) {
+        // Pen change
+        commands.push({
+          type: GrblCommandType.MOVE,
+          x: 0,
+          y: 0,
+          velocityMms: this.config.moveVelocity,
+        });
+        commands.push({
+          type: GrblCommandType.DWELL,
+          timeMs: BASE_MOVE_DWELL_MS,
+        });
+        await this.stream(commands);
+        await this.penChange(pen);
+        commands = [];
+        commands.push({
+          type: GrblCommandType.HOME,
+        });
+      }
+
+      if (currentPen !== pen || currentColor !== color) {
+        const charge = this.sketchConfig.pens[pen].charge;
+        if (charge) {
+          commands.push(
+            ...charge(color).flatMap((command) => this.toGrblCommands(command)),
+          );
+        }
+      }
+
+      currentPen = pen;
+      currentColor = color;
+
+      for (const [i, { x, y }] of vertices.entries()) {
         if (i === 0) {
           // Move to the start point
           commands.push({
@@ -251,7 +291,7 @@ export class GrblPlotter implements Plotter {
           x,
           y,
           // Only need to send velocity on the first draw step, then it'll be inherited
-          velocityMms: i === 1 ? this.config.moveVelocity : undefined,
+          velocityMms: i === 1 ? this.config.drawVelocity : undefined,
         });
       }
       // Lift the pen up
@@ -394,6 +434,54 @@ export class GrblPlotter implements Plotter {
           currentBufferBytes -= freed;
         }
       }
+    }
+  }
+
+  private async penChange(pen: number): Promise<void> {
+    const rl = readline.createInterface({ input: stdin, output: stdout });
+    await rl.question(`Change pen to #${pen}, and press Enter to continue\n`);
+    rl.close();
+  }
+
+  private toGrblCommands(command: PlotterCommand): GrblCommand[] {
+    switch (command.type) {
+      case PlotterCommandType.HOME:
+        return [{ type: GrblCommandType.HOME }];
+      case PlotterCommandType.SLEEP:
+        return [{ type: GrblCommandType.SLEEP }];
+      case PlotterCommandType.PEN_UP:
+        return [
+          {
+            type: GrblCommandType.MOVE,
+            z: command.height ?? this.config.penUpHeight,
+            velocityMms: this.config.penRaiseVelocity,
+          },
+          {
+            type: GrblCommandType.DWELL,
+            timeMs: BASE_PEN_DWELL_MS,
+          },
+        ];
+      case PlotterCommandType.PEN_DOWN:
+        return [
+          {
+            type: GrblCommandType.MOVE,
+            z: command.height ?? this.config.penDownHeight,
+            velocityMms: this.config.penLowerVelocity,
+          },
+          {
+            type: GrblCommandType.DWELL,
+            timeMs: BASE_PEN_DWELL_MS,
+          },
+        ];
+      case PlotterCommandType.MOVE:
+        return [
+          {
+            type: GrblCommandType.MOVE,
+            velocityMms: this.config.moveVelocity,
+          },
+        ];
+      default:
+        throw new UnreachableError(command);
     }
   }
 }

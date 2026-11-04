@@ -2,6 +2,7 @@ import type { RgbaColor } from "./color";
 import { rgb } from "./color";
 import type { Vec2 } from "./math";
 import { vec2 } from "./math";
+import type { PlotterCommand } from "./plotter/command";
 import type { PartialPlotterConfig, PlotterConfig } from "./plotter/config";
 import { mergePlotterConfig } from "./plotter/config";
 import { randomId } from "./random";
@@ -44,14 +45,21 @@ export type PartialConfig = Partial<
   plotter?: PartialPlotterConfig | undefined;
 };
 
-type OptimizationConfig = {
+export type OptimizationConfig = {
   readonly mergeThreshold: number;
   readonly precision: number;
+  readonly sortPens: boolean;
+  readonly sortColors: boolean;
 };
 
 export type Pen = {
   readonly colors: RgbaColor[];
   readonly thickness: number;
+  readonly charge?: (color: number) => PlotterCommand[];
+  readonly recharge?: {
+    minDistance: number;
+    maxDistance: number;
+  };
 };
 
 export type Config = Omit<ConfigOpts, "paper"> & {
@@ -68,10 +76,12 @@ class ConfigImpl implements Config {
   defaultResolution: number = 2;
   epsilon: number = 1e-6;
   seed: number | string = randomId();
-  optimization: {
-    mergeThreshold: number;
-    precision: number;
-  } = { mergeThreshold: 1, precision: 3 };
+  optimization: OptimizationConfig = {
+    mergeThreshold: 1,
+    precision: 3,
+    sortPens: true,
+    sortColors: true,
+  };
   plotter: PlotterConfig | undefined;
   pens: Pen[] = [
     {

@@ -4,7 +4,7 @@ import type { Vec2 } from "./math";
 export function vertices(line: Line): Vec2[];
 export function vertices(line: Line, vertices: Vec2[]): Line;
 export function vertices(line: Line, vertices?: Vec2[]): Vec2[] | Line {
-  if (!vertices) {
+  if (vertices == null) {
     return line.vertices;
   }
 
@@ -17,7 +17,7 @@ export function vertices(line: Line, vertices?: Vec2[]): Vec2[] | Line {
 export function layer(line: Line): number;
 export function layer(line: Line, layer: number): Line;
 export function layer(line: Line, layer?: number): number | Line {
-  if (!layer) {
+  if (layer == null) {
     return line.layer;
   }
 
@@ -30,7 +30,7 @@ export function layer(line: Line, layer?: number): number | Line {
 export function pen(line: Line): number;
 export function pen(line: Line, pen: number): Line;
 export function pen(line: Line, pen?: number): number | Line {
-  if (!pen) {
+  if (pen == null) {
     return line.pen;
   }
 
@@ -43,7 +43,7 @@ export function pen(line: Line, pen?: number): number | Line {
 export function color(line: Line): number;
 export function color(line: Line, color: number): Line;
 export function color(line: Line, color?: number): number | Line {
-  if (!color) {
+  if (color == null) {
     return line.color;
   }
 

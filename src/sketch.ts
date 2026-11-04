@@ -6,6 +6,7 @@ import { getConfig, setConfig } from "./config";
 import type { Line } from "./line";
 import type { Vec2 } from "./math/vec2";
 import { noiseSeed } from "./noise";
+import { group, sort } from "./optimize";
 import { randomSeed } from "./random";
 
 export interface Sketch {
@@ -170,17 +171,18 @@ class SketchImpl<T> implements Sketch {
       svg.replaceChildren();
     }
 
-    lines.sort((a, b) => layer(a) - layer(b));
+    const sorted = sort(lines, this.config.optimization);
+    const grouped = group(sorted);
 
     const linesByLayerId = new Map<number, Line[]>();
-    for (const line of lines) {
-      const layerId = layer(line);
+    for (const group of grouped) {
+      const layerId = layer(group[0]);
       if (!linesByLayerId.has(layerId)) {
-        linesByLayerId.set(layerId, [line]);
+        linesByLayerId.set(layerId, group);
         continue;
       }
 
-      linesByLayerId.get(layerId)?.push(line);
+      linesByLayerId.get(layerId)?.push(...group);
     }
 
     const layers: SVGGElement[] = [];
