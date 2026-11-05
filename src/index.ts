@@ -16,6 +16,14 @@ export {
   segmentIntersectsSegment,
 } from "./geometry";
 export { contourHatch, hatch } from "./hatch";
+export {
+  distribute,
+  distributeN,
+  entries,
+  pairs,
+  range,
+  wrappingPairs,
+} from "./iteration";
 export type { Line } from "./line";
 export { line } from "./line";
 export { subdivide } from "./line-ops";
